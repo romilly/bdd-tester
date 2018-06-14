@@ -5,9 +5,12 @@ import time
 
 import zmq
 
-class Subscriber():
+from spikes.quber import Qber
+
+
+class Subscriber(Qber):
     def __init__(self):
-        self.context = zmq.Context()
+        Qber.__init__(self)
         self.subsock = None
 
     def run(self):
@@ -18,26 +21,24 @@ class Subscriber():
         time.sleep(1)
 
         # Second, synchronize with publisher
-        self.sync()
-
-
+        self.sync(5562)
 
         # Third, get our updates and report how many we got
-        nbr = 0
+        self.process_messages()
+
+    def process_messages(self):
         while True:
             msg = self.sub_recv()
+            print(msg)
             if msg == 'END':
                 break
-            nbr += 1
-
-        print ('Received %d updates' % nbr)
 
     def sub_recv(self):
         return self.recv(self.subsock)
 
-    def sync(self):
+    def sync(self, port):
         self.syncclient = self.context.socket(zmq.REQ)
-        self.syncclient.connect('tcp://localhost:5562')
+        self.syncclient.connect('tcp://localhost:%i' % port)
 
         # send a synchronization request
         self.sync_send('')
@@ -46,14 +47,11 @@ class Subscriber():
         id = self.sync_recv()
         print('my id is %i' % int(id))
 
-    def recv(self, socket):
-        return socket.recv().decode('utf8')
-
     def sync_recv(self):
         return self.recv(self.syncclient)
 
     def sync_send(self, message):
-        self.syncclient.send_string(message)
+        self.send(self.syncclient, message)
 
     def subscribe(self, port):
         self.subsock = self.context.socket(zmq.SUB)

@@ -1,3 +1,4 @@
 #!/usr/bin/env bash
-cd ../src/spikes
-python3 syncpub.py & python3 syncsub.py & python3 syncsub.py
+cd ../src
+export PYTHONPATH=$PYTHONPATH:'.'
+python3 spikes/syncpub.py & python3 spikes/syncsub.py & python3 spikes/syncsub.py

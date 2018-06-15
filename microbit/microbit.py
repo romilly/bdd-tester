@@ -27,13 +27,16 @@ microbit module, as described below.
 Note that the API exposes integers only (ie no floats are needed, but they may
 be accepted).  We thus use milliseconds for the standard time unit.
 """
+from spikes.syncsub import Subscriber
 
-from microbit import (display as display, uart as uart, spi as spi, i2c as i2c,
-                      accelerometer as accelerometer, compass as compass)
+_subscriber = None
+
 
 from typing import Any, List, overload, Union
 
 from display import Image
+
+import time
 
 
 def panic(n: int) -> None:
@@ -56,6 +59,7 @@ def sleep(n: int) -> None:
     will pause the execution for one second.  ``n`` can be an integer or
     a floating point number.
     """
+    time.sleep(n/1000.0)
 
 
 def running_time() -> int:
@@ -68,6 +72,7 @@ def temperature() -> int:
     """Return the temperature of the micro:bit in degrees Celcius."""
 
 
+
 class Button:
     """Represents a button.
 
@@ -75,27 +80,42 @@ class Button:
         This class is not actually available to the user, it is only used by
         the two button instances, which are provided already initialized.
         """
+    def __init__(self):
+        self._pressed = False
+        self._count = 0
+
+    def _set_pressed(self, boolean):
+        self._pressed = boolean
+        self._count += 1
 
     def is_pressed(self) -> bool:
         """returns True or False to indicate if the button is pressed at the time of
         the method call.
         """
+        _subscriber.run()
+        return self._pressed
 
     def was_pressed(self) -> bool:
         """ returns True or False to indicate if the button was pressed since the device
         started or the last time this method was called.
         """
+        result = self._pressed
+        self._pressed = False
+        return result
 
     def get_presses(self) -> int:
         """Returns the running total of button presses, and resets this total
         to zero before returning.
         """
+        result = self._count
+        self._count = 0
+        return result
 
 
-button_a: Button
+button_a = Button()
 """A ``Button`` instance (see below) representing the left button."""
 
-button_b: Button
+button_b = Button()
 """Represents the right button."""
 
 
@@ -107,10 +127,12 @@ class MicroBitDigitalPin:
     ``PULL_DOWN``, ``PULL_UP``. Only when in ``read_digital`` mode can you call
     ``set_pull`` to change the pull mode from the default.
     """
+    def __init__(self, pinnum):
+        self._pinnum = pinnum
 
-    NO_PULL: int = 0
-    PULL_UP: int = 1
-    PULL_DOWN: int = 2
+    NO_PULL = 0
+    PULL_UP = 1
+    PULL_DOWN = 2
 
     def read_digital(self) -> int:
         """Return 1 if the pin is high, and 0 if it's low."""
@@ -158,62 +180,60 @@ class MicroBitTouchPin(MicroBitAnalogDigitalPin):
         detected.
         """
 
-pin0: MicroBitTouchPin
+pin0 = MicroBitTouchPin(0)
 """Pad 0."""
 
-pin1: MicroBitTouchPin
+pin1 = MicroBitTouchPin(1)
 """Pad 1."""
 
-pin2: MicroBitTouchPin
+pin2 = MicroBitTouchPin(2)
 """Pad 2."""
 
-pin2: MicroBitAnalogDigitalPin
-"""Pad 2."""
 
-pin3: MicroBitAnalogDigitalPin
+pin3 = MicroBitAnalogDigitalPin(3)
 """Column 1."""
 
-pin4: MicroBitAnalogDigitalPin
+pin4 = MicroBitAnalogDigitalPin(4)
 """Column 2."""
 
-pin5: MicroBitDigitalPin
+pin5 = MicroBitDigitalPin(5)
 """Button A."""
 
-pin6: MicroBitDigitalPin
+pin6 = MicroBitDigitalPin(6)
 """Row 2."""
 
-pin7: MicroBitDigitalPin
+pin7 = MicroBitDigitalPin(7)
 
 """Row 1."""
 
-pin8: MicroBitDigitalPin
+pin8 = MicroBitDigitalPin(8)
 
-pin9: MicroBitDigitalPin
+pin9 = MicroBitDigitalPin(9)
 """Row 3."""
 
-pin10: MicroBitAnalogDigitalPin
+pin10 = MicroBitAnalogDigitalPin(10)
 """Column 3."""
 
-pin11: MicroBitDigitalPin
+pin11 = MicroBitDigitalPin(11)
 """Button B."""
 
-pin12: MicroBitDigitalPin
+pin12 = MicroBitDigitalPin(12)
 
-pin13: MicroBitDigitalPin
+pin13 = MicroBitDigitalPin(13)
 """SPI MOSI."""
 
-pin14: MicroBitDigitalPin
+pin14 = MicroBitDigitalPin(14)
 """SPI MISO."""
 
-pin15: MicroBitDigitalPin
+pin15 = MicroBitDigitalPin(15)
 """SPI SCK."""
 
-pin16: MicroBitDigitalPin
+pin16 = MicroBitDigitalPin(16)
 
-pin19: MicroBitDigitalPin
+pin19 = MicroBitDigitalPin(19)
 """I2C SCL."""
 
-pin20: MicroBitDigitalPin
+pin20 = MicroBitDigitalPin(20)
 """I2C SDA."""
 
 
@@ -225,72 +245,73 @@ class Image:
         display.show(Image.HAPPY)
     """
 
-    HEART: Image
-    HEART_SMALL: Image
-    HAPPY: Image
-    SMILE: Image
-    SAD: Image
-    CONFUSED: Image
-    ANGRY: Image
-    ASLEEP: Image
-    SURPRISED: Image
-    SILLY: Image
-    FABULOUS: Image
-    MEH: Image
-    YES: Image
-    NO: Image
-    CLOCK12: Image
-    CLOCK11: Image
-    CLOCK10: Image
-    CLOCK9: Image
-    CLOCK8: Image
-    CLOCK7: Image
-    CLOCK6: Image
-    CLOCK5: Image
-    CLOCK4: Image
-    CLOCK3: Image
-    CLOCK2: Image
-    CLOCK1: Image
-    ARROW_N: Image
-    ARROW_NE: Image
-    ARROW_E: Image
-    ARROW_SE: Image
-    ARROW_S: Image
-    ARROW_SW: Image
-    ARROW_W: Image
-    ARROW_NW: Image
-    TRIANGLE: Image
-    TRIANGLE_LEFT: Image
-    CHESSBOARD: Image
-    DIAMOND: Image
-    DIAMOND_SMALL: Image
-    SQUARE: Image
-    SQUARE_SMALL: Image
-    RABBIT: Image
-    COW: Image
-    MUSIC_CROTCHET: Image
-    MUSIC_QUAVER: Image
-    MUSIC_QUAVERS: Image
-    PITCHFORK: Image
-    XMAS: Image
-    PACMAN: Image
-    TARGET: Image
-    TSHIRT: Image
-    ROLLERSKATE: Image
-    DUCK: Image
-    HOUSE: Image
-    TORTOISE: Image
-    BUTTERFLY: Image
-    STICKFIGURE: Image
-    GHOST: Image
-    SWORD: Image
-    GIRAFFE: Image
-    SKULL: Image
-    UMBRELLA: Image
-    SNAKE: Image
+    HEART = None
+    HEART_SMALL = None
+    HAPPY = None
+    SMILE = None
+    SAD = None
+    CONFUSED = None
+    ANGRY = None
+    ASLEEP = None
+    SURPRISED = None
+    SILLY = None
+    FABULOUS = None
+    MEH = None
+    YES = None
+    NO = None
+    CLOCK12 = None
+    CLOCK11 = None
+    CLOCK10 = None
+    CLOCK9 = None
+    CLOCK8 = None
+    CLOCK7 = None
+    CLOCK6 = None
+    CLOCK5 = None
+    CLOCK4 = None
+    CLOCK3 = None
+    CLOCK2 = None
+    CLOCK1 = None
+    ARROW_N = None
+    ARROW_NE = None
+    ARROW_E = None
+    ARROW_SE = None
+    ARROW_S = None
+    ARROW_SW = None
+    ARROW_W = None
+    ARROW_NW = None
+    TRIANGLE = None
+    TRIANGLE_LEFT = None
+    CHESSBOARD = None
+    DIAMOND = None
+    DIAMOND_SMALL = None
+    SQUARE = None
+    SQUARE_SMALL = None
+    RABBIT = None
+    COW = None
+    MUSIC_CROTCHET = None
+    MUSIC_QUAVER = None
+    MUSIC_QUAVERS = None
+    PITCHFORK = None
+    XMAS = None
+    PACMAN = None
+    TARGET = None
+    TSHIRT = None
+    ROLLERSKATE = None
+    DUCK = None
+    HOUSE = None
+    TORTOISE = None
+    BUTTERFLY = None
+    STICKFIGURE = None
+    GHOST = None
+    SWORD = None
+    GIRAFFE = None
+    SKULL = None
+    UMBRELLA = None
+    SNAKE = None
 
-    ALL_CLOCKS: List[Image]
-    ALL_ARROWS: List[Image]
+    ALL_CLOCKS = [CLOCK1, CLOCK2, CLOCK3, CLOCK4, CLOCK5, CLOCK6,
+                  CLOCK7, CLOCK8, CLOCK8, CLOCK9, CLOCK11, CLOCK12]
+    ALL_ARROWS = [] # TODO: add arrows
 
     @overload
     def __init__(self, string: str) -> None:
@@ -378,8 +399,8 @@ class Image:
         read-only images, like ``Image.HEART``.
         """
 
-    def blit(self, src: Image, x: int, y: int, w: int, h: int, xdest: int = 0,
-             ydest: int = 0) -> None:
+    def blit(self, src, x, y, w, h, xdest = 0,
+             ydest = 0) -> None:
         """Copy the rectangle defined by ``x``, ``y``, ``w``, ``h`` from the
         image ``src`` into this image at ``xdest``, ``ydest``. Areas in the
         source rectangle, but outside the source image are treated as having a
@@ -402,7 +423,7 @@ class Image:
     def __str__(self) -> str:
         """Get a readable string representation of the image."""
 
-    def __add__(self, other: Image) -> Image:
+    def __add__(self, other = None) -> Image:
         """Create a new image by adding the brightness values from the two
         images for each pixel.
         """
@@ -412,3 +433,4 @@ class Image:
         ``n``.
         """
 
+_subscriber = Subscriber(button_a)

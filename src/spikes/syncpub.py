@@ -1,11 +1,13 @@
 #
 #  Synchronized publisher
 #
+import time
+
 import zmq
 
 from spikes.quber import Qber
 
-SUBSCRIBERS_EXPECTED = 2
+SUBSCRIBERS_EXPECTED = 1
 
 class Publisher(Qber):
     def __init__(self):
@@ -30,7 +32,13 @@ class Publisher(Qber):
             self.sync_send('%i' % subscribers)
             subscribers += 1
             print("+1 subscriber (%i/%i)" % (subscribers, SUBSCRIBERS_EXPECTED))
+        print('a')
         self.publish('button_a')
+        time.sleep(1)
+        print('a')
+        self.publish('button_a')
+        time.sleep(2)
+        print('done')
         self.publish('END')
 
     def sync_send(self, message):

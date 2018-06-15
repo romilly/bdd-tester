@@ -90,5 +90,5 @@ def write(buf: Union[bytes, bytearray]) -> Optional[int]:
     Return value: number of bytes written or ``None`` on timeout.
     """
 
-ODD: int
-EVEN: int
+# ODD: int
+# EVEN: int

@@ -1,3 +1,4 @@
+
 """micro:bit Micropython API
 
 Everything directly related to interacting with the hardware lives in the
@@ -27,14 +28,15 @@ microbit module, as described below.
 Note that the API exposes integers only (ie no floats are needed, but they may
 be accepted).  We thus use milliseconds for the standard time unit.
 """
-from spikes.syncsub import Subscriber
 
-_subscriber = None
+from . import (display as display,
+    # uart as uart, spi as spi, i2c as i2c, accelerometer as accelerometer, compass as compass
+    )
+from helpers.harness import _harness
+
 
 
 from typing import Any, List, overload, Union
-
-from display import Image
 
 import time
 
@@ -72,7 +74,6 @@ def temperature() -> int:
     """Return the temperature of the micro:bit in degrees Celcius."""
 
 
-
 class Button:
     """Represents a button.
 
@@ -92,7 +93,7 @@ class Button:
         """returns True or False to indicate if the button is pressed at the time of
         the method call.
         """
-        _subscriber.run()
+        _harness.run()
         return self._pressed
 
     def was_pressed(self) -> bool:
@@ -114,6 +115,7 @@ class Button:
 
 button_a = Button()
 """A ``Button`` instance (see below) representing the left button."""
+_harness.add_callback('button_a', button_a)
 
 button_b = Button()
 """Represents the right button."""
@@ -161,6 +163,7 @@ class MicroBitDigitalPin:
         """Set the period of the PWM signal being output to ``period`` in
         microseconds. The minimum valid value is 35µs.
         """
+
 
 class MicroBitAnalogDigitalPin(MicroBitDigitalPin):
     def read_analog(self) -> int:
@@ -362,32 +365,32 @@ class Image:
         integer between 0 and 9.
         """
 
-    def shift_left(self, n: int) -> Image:
+    def shift_left(self, n):
         """Return a new image created by shifting the picture left by ``n``
         columns.
         """
 
-    def shift_right(self, n: int) -> Image:
+    def shift_right(self, n):
         """Same as ``image.shift_left(-n)``."""
 
-    def shift_up(self, n: int) -> Image:
+    def shift_up(self, n):
         """Return a new image created by shifting the picture up by ``n``
         rows.
         """
 
-    def shift_down(self, n: int) -> Image:
+    def shift_down(self, n: int):
         """Same as ``image.shift_up(-n)``."""
 
-    def crop(self, x: int, y: int, w: int, h: int) -> Image:
+    def crop(self, x: int, y: int, w: int, h: int):
         """Return a new image by cropping the picture to a width of ``w`` and a
         height of ``h``, starting with the pixel at column ``x`` and row
         ``y``.
         """
 
-    def copy(self) -> Image:
+    def copy(self):
         """Return an exact copy of the image."""
 
-    def invert(self) -> Image:
+    def invert(self):
         """Return a new image by inverting the brightness of the pixels in the
         source image."""
 
@@ -423,14 +426,12 @@ class Image:
     def __str__(self) -> str:
         """Get a readable string representation of the image."""
 
-    def __add__(self, other = None) -> Image:
+    def __add__(self, other = None):
         """Create a new image by adding the brightness values from the two
         images for each pixel.
         """
 
-    def __mul__(self, n: float) -> Image:
+    def __mul__(self, n: float):
         """Create a new image by multiplying the brightness of each pixel by
         ``n``.
         """
-
-_subscriber = Subscriber(button_a)

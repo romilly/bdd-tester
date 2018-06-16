@@ -9,20 +9,15 @@ import zmq
 
 from helpers.quber import Qber
 
-# TODO: change sequence so we know id before we subscribe and use subscription filter properly!
 class Harness(Qber):
     def __init__(self):
         Qber.__init__(self)
         self.subsock = None
         self._callbacks = {}
-        # First, connect our subscriber socket
         self.subscribe(5561)
-        time.sleep(1)
-        # Second, synchronize with publisher
         self.id = int(self.sync(5562))
-        # Initialize poll set
+        self.re_subscribe()
         self.poller = zmq.Poller()
-        # poller.register(self.syncclient, zmq.POLLIN)
         self.poller.register(self.subsock, zmq.POLLIN)
 
     def add_callback(self, key, object):
@@ -31,17 +26,10 @@ class Harness(Qber):
 
     def run(self):
         print('run')
-        # msg = self.sub_recv()
-        # Process messages from both sockets
-        # while True:
         try:
             socks = dict(self.poller.poll())
         except KeyboardInterrupt:
              sys.exit(-1)
-
-            # if receiver in socks:
-            #     message = receiver.recv()
-                # process task
 
         if self.subsock in socks:
             msg = self.pub_receive()
@@ -59,11 +47,7 @@ class Harness(Qber):
     def sync(self, port):
         self.syncclient = self.context.socket(zmq.REQ)
         self.syncclient.connect('tcp://localhost:%i' % port)
-
-        # send a synchronization request
         self.sync_send('')
-
-        # wait for synchronization reply
         return self.sync_recv()
 
     def sync_recv(self):
@@ -92,5 +76,12 @@ class Harness(Qber):
             return msg
         else:
             return None
+
+    def re_subscribe(self):
+        self.subsock.setsockopt(zmq.UNSUBSCRIBE, b'')
+        self.subsock.setsockopt(zmq.SUBSCRIBE, b'*') # radio messages
+        self.subsock.setsockopt(zmq.SUBSCRIBE, str(self.id).encode('utf8')) # radio messages
+
+
 
 _harness = Harness()

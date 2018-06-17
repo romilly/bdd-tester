@@ -32,11 +32,11 @@ be accepted).  We thus use milliseconds for the standard time unit.
 from . import (display as display,
     # uart as uart, spi as spi, i2c as i2c, accelerometer as accelerometer, compass as compass
     )
-from helpers.harness import _harness
+from mptdd.harness import _harness
 
 
 
-from typing import Any, List, overload, Union
+from typing import Any, overload
 
 import time
 

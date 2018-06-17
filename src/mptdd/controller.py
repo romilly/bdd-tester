@@ -1,46 +1,44 @@
-#
-#  Synchronized publisher
-#
 import sys
-import time
 import zmq
-from helpers.quber import Qber
+from mptdd.quber import Qber
+import logging
 
 
-class Publisher(Qber):
-    def __init__(self, subscribers=1):
+class Controller(Qber):
+    def __init__(self, micro_count=1, log_level=logging.DEBUG):
+        logging.basicConfig(filename='testing.log', level=log_level)
         Qber.__init__(self)
-        self._subscribers = subscribers
+        self._micro_count = micro_count
+        logging.info('Starting test run')
         self.bind_publisher(5561)
-        self.syncservice = self.context.socket(zmq.REP)
-        self.syncservice.bind('tcp://*:5562')
-        subscribers = 0
-        while subscribers < self._subscribers:
-            self.sync_recv()
-            self.sync_send('%i' % subscribers)
-            subscribers += 1
-            print("+1 subscriber (%i/%i)" % (subscribers, self._subscribers))
-
+        self.watcher = self.context.socket(zmq.REP)
+        self.watcher.bind('tcp://*:5562')
+        id = 0
+        logging.debug('Waiting for %i micro%s' % (micro_count, '' if micro_count == 1 else 's'))
+        while id < self._micro_count:
+            self.sync_recv() # wait for micro
+            self.sync_send('%i' % id)
+            id += 1
+            logging.debug("+1 micro (%i/%i)" % (id, self._micro_count))
 
     def run(self):
-
-        print('a')
         self.publish('button_a')
         self.expect_display('Ouch!')
-        print('a')
         self.publish('button_a')
         self.expect_display('Ouch!')
-        print('done')
         self.publish('END')
+        logging.info('finished test run')
 
     def sync_send(self, message):
-        self.send(self.syncservice, message)
+        self.send(self.watcher, message)
 
     def sync_recv(self):
-        return self.recv(self.syncservice)
+        return self.recv(self.watcher)
 
     def publish(self, message, id=0):
-        self.send(self.publisher, '%i:%s' % (id, message))
+        text = '%i:%s' % (id, message)
+        logging.debug(text)
+        self.send(self.publisher, text)
 
     def bind_publisher(self, port):
         self.publisher = self.context.socket(zmq.PUB)
@@ -48,7 +46,7 @@ class Publisher(Qber):
 
     def expect_display(self, text, id=0, timeout=10000):
         try:
-            if self.syncservice.poll(timeout=timeout):
+            if self.watcher.poll(timeout=timeout):
                 incoming = self.sync_recv()
                 sender_id = int(incoming[0])
                 msg = incoming[2:]
@@ -64,4 +62,4 @@ class Publisher(Qber):
 
 
 if __name__ == '__main__':
-   Publisher().run()
+   Controller(log_level=logging.DEBUG).run()

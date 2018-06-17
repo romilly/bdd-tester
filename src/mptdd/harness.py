@@ -3,11 +3,9 @@
 #
 import sys
 
-import time
-
 import zmq
 
-from helpers.quber import Qber
+from mptdd.quber import Qber
 
 class Harness(Qber):
     def __init__(self):

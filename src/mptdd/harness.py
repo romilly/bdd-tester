@@ -2,8 +2,8 @@
 #  Synchronized subscriber
 #
 import sys
-
 import zmq
+import logging
 
 from mptdd.quber import Qber
 
@@ -14,9 +14,12 @@ class Harness(Qber):
         self._callbacks = {}
         self.subscribe(5561)
         self.id = int(self.sync(5562))
+        print('my id is %i' % self.id)
         self.re_subscribe()
         self.poller = zmq.Poller()
         self.poller.register(self.subsock, zmq.POLLIN)
+        logging.basicConfig(filename='testing1.log', level=logging.DEBUG,
+                            format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
     def add_callback(self, key, object):
         self._callbacks[key] = object
@@ -68,6 +71,8 @@ class Harness(Qber):
 
     def pub_receive(self):
         incoming = self.sub_recv()
+        logging.debug(incoming)
+        print('bit %i got %s' % (self.id, incoming))
         target_id =incoming[0]
         msg = incoming[2:]
         if target_id == str(self.id) or target_id == '*':
@@ -76,9 +81,10 @@ class Harness(Qber):
             return None
 
     def re_subscribe(self):
+        logging.debug('id set to %i' % self.id)
         self.subsock.setsockopt(zmq.UNSUBSCRIBE, b'')
         self.subsock.setsockopt(zmq.SUBSCRIBE, b'*') # radio messages
-        self.subsock.setsockopt(zmq.SUBSCRIBE, str(self.id).encode('utf8')) # radio messages
+        self.subsock.setsockopt(zmq.SUBSCRIBE, str(self.id).encode('utf8'))
 
 
 

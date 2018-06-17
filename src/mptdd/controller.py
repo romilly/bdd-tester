@@ -5,9 +5,10 @@ import logging
 
 
 class Controller(Qber):
-    def __init__(self, micro_count=1, log_level=logging.DEBUG):
-        logging.basicConfig(filename='testing.log', level=log_level)
+    def __init__(self, micro_count=2, log_level=logging.DEBUG):
         Qber.__init__(self)
+        logging.basicConfig(filename='testing.log', level=log_level,
+                            format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
         self._micro_count = micro_count
         logging.info('Starting test run')
         self.bind_publisher(5561)
@@ -24,9 +25,11 @@ class Controller(Qber):
     def run(self):
         self.publish('button_a')
         self.expect_display('Ouch!')
-        self.publish('button_a')
-        self.expect_display('Ouch!')
-        self.publish('END')
+        self.publish('button_a', 1)
+        self.expect_display('Ouch!', 1)
+        # self.publish('button_a')
+        # self.expect_display('Ouch!')
+        self.publish('END','*')
         logging.info('finished test run')
 
     def sync_send(self, message):
@@ -35,8 +38,8 @@ class Controller(Qber):
     def sync_recv(self):
         return self.recv(self.watcher)
 
-    def publish(self, message, id=0):
-        text = '%i:%s' % (id, message)
+    def publish(self, message, id='0'):
+        text = '%s:%s' % (id, message)
         logging.debug(text)
         self.send(self.publisher, text)
 
@@ -48,14 +51,14 @@ class Controller(Qber):
         try:
             if self.watcher.poll(timeout=timeout):
                 incoming = self.sync_recv()
+                logging.debug('incoming %s' % incoming)
                 sender_id = int(incoming[0])
                 msg = incoming[2:]
                 self.sync_send('')
-#                self.sync_send('')
                 if msg == text and id == sender_id :
                     return
                 else:
-                    raise ValueError('Ugh! got %s from %i' % (msg, id))
+                    raise ValueError('Ugh! got %s from %i' % (msg, sender_id))
         except KeyboardInterrupt:
             sys.exit(-1)
         raise Exception('Timed out waiting for %s to display' % text)

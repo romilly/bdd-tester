@@ -7,19 +7,21 @@ import logging
 
 from mptdd.quber import Qber
 
+
 class Harness(Qber):
     def __init__(self):
         Qber.__init__(self)
         self.subsock = None
         self._callbacks = {}
+        logging.basicConfig(filename='testing1.log', level=logging.DEBUG,
+                            format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        logging.info('Starting test run')
         self.subscribe(5561)
         self.id = int(self.sync(5562))
         print('my id is %i' % self.id)
         self.re_subscribe()
         self.poller = zmq.Poller()
         self.poller.register(self.subsock, zmq.POLLIN)
-        logging.basicConfig(filename='testing1.log', level=logging.DEBUG,
-                            format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
     def add_callback(self, key, object):
         self._callbacks[key] = object
@@ -37,7 +39,7 @@ class Harness(Qber):
         else:
             return
         if msg == 'END':
-            print('done')
+            logging.info('done')
             sys.exit(0)
         if msg in ['button_a', 'button_b']:
             self.callback(msg)._pressed = True

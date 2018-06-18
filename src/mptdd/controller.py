@@ -1,3 +1,4 @@
+import subprocess
 import sys
 import zmq
 from mptdd.quber import Qber
@@ -5,32 +6,37 @@ import logging
 
 
 class Controller(Qber):
-    def __init__(self, micro_count=2, log_level=logging.DEBUG):
+    def __init__(self, log_level=logging.DEBUG):
         Qber.__init__(self)
+        self.processes = []
+        self.outputs = []
         logging.basicConfig(filename='testing.log', level=log_level,
                             format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-        self._micro_count = micro_count
+
+
+
+    def run(self, *scripts):
         logging.info('Starting test run')
+        micro_count = len(scripts)
         self.bind_publisher(5561)
         self.watcher = self.context.socket(zmq.REP)
         self.watcher.bind('tcp://*:5562')
         id = 0
         logging.debug('Waiting for %i micro%s' % (micro_count, '' if micro_count == 1 else 's'))
-        while id < self._micro_count:
+        self.start_scripts(scripts)
+        while id < micro_count:
             self.sync_recv() # wait for micro
             self.sync_send('%i' % id)
             id += 1
-            logging.debug("+1 micro (%i/%i)" % (id, self._micro_count))
+            logging.debug("+1 micro (%i/%i)" % (id, micro_count))
 
-    def run(self):
-        self.publish('button_a')
-        self.expect_display('Ouch!')
-        self.publish('button_a', 1)
-        self.expect_display('Ouch!', 1)
-        # self.publish('button_a')
-        # self.expect_display('Ouch!')
-        self.publish('END','*')
-        logging.info('finished test run')
+    def start_scripts(self, scripts):
+        for script in scripts:
+            print(script)
+            self.processes.append(subprocess.Popen(['python'] + [script],
+                                              cwd='/home/romilly/git/active/bdd-tester',
+                                              stdout=subprocess.PIPE))
+
 
     def sync_send(self, message):
         self.send(self.watcher, message)
@@ -63,6 +69,10 @@ class Controller(Qber):
             sys.exit(-1)
         raise Exception('Timed out waiting for %s to display' % text)
 
+    def close(self):
+        self.publish('END', '*')
+        for process in self.processes:
+            process.wait()
+            self.outputs += [process.communicate()]
+        logging.info('finished test run')
 
-if __name__ == '__main__':
-   Controller(log_level=logging.DEBUG).run()

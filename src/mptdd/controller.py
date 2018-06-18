@@ -67,7 +67,7 @@ class Controller(Qber):
                 return Event(sender_id, 'display', msg)
         except KeyboardInterrupt:
             sys.exit(-1)
-        raise Exception('Timed out waiting for %s to display' % text)
+        raise Exception('Timed out waiting for event')
 
     def close(self):
         self.publish('END', '*')

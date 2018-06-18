@@ -1,3 +1,4 @@
+import json
 from collections import namedtuple
 
 import subprocess
@@ -60,10 +61,11 @@ class Controller(Qber):
             if self.watcher.poll(timeout=timeout):
                 incoming = self.sync_recv()
                 logging.debug('incoming %s' % incoming)
-                sender_id = int(incoming[0])
-                msg = incoming[2:]
+                # sender_id = int(incoming[0])
+                # msg = incoming[2:]
+                logging.debug(incoming)
                 self.sync_send('')
-                return Event(sender_id, 'display', msg)
+                return Event(*json.loads(incoming))
         except KeyboardInterrupt:
             sys.exit(-1)
         raise Exception('Timed out waiting for event')

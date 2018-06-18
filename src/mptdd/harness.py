@@ -1,10 +1,12 @@
 #
 #  Synchronized subscriber
 #
+import json
 import sys
 import zmq
 import logging
 
+from mptdd.controller import Event
 from mptdd.quber import Qber
 
 
@@ -20,8 +22,6 @@ class Harness(Qber):
         self.id = int(self.sync(5562))
         print('my id is %i' % self.id)
         self.re_subscribe()
-        self.poller = zmq.Poller()
-        self.poller.register(self.subsock, zmq.POLLIN)
 
     def add_callback(self, key, object):
         self._callbacks[key] = object
@@ -29,12 +29,7 @@ class Harness(Qber):
 
     def run(self):
         print('run')
-        try:
-            socks = dict(self.poller.poll())
-        except KeyboardInterrupt:
-             sys.exit(-1)
-
-        if self.subsock in socks:
+        if self.subsock.poll():
             msg = self.pub_receive()
         else:
             return
@@ -59,8 +54,9 @@ class Harness(Qber):
     def sync_send(self, message):
         self.send(self.syncclient, message)
 
-    def send_message(self, message):
-        self.sync_send('%i:%s' % (self.id, message))
+    def send_message(self, e_type, message):
+        event = Event(self.id, e_type, message)
+        self.sync_send(json.dumps(event))
         return self.sync_recv()
 
     def subscribe(self, port):

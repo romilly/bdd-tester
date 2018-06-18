@@ -78,7 +78,7 @@ def scroll(string: str, delay: int = 150, *, wait: bool = True,
     Note that the ``wait``, ``loop`` and ``monospace`` arguments must be specified
     using their keyword.
     """
-    _harness.send_message(string)
+    _harness.send_message('display', string)
 
 
 

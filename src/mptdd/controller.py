@@ -1,10 +1,14 @@
+from collections import namedtuple
+
 import subprocess
 import sys
 import zmq
 from mptdd.quber import Qber
 import logging
 
+Event = namedtuple('Event',['id','e_type','value'])
 
+# TODO: rename to MicrobitController
 class Controller(Qber):
     def __init__(self, log_level=logging.DEBUG):
         Qber.__init__(self)
@@ -12,8 +16,6 @@ class Controller(Qber):
         self.outputs = []
         logging.basicConfig(filename='testing.log', level=log_level,
                             format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-
-
 
     def run(self, *scripts):
         logging.info('Starting test run')
@@ -53,7 +55,8 @@ class Controller(Qber):
         self.publisher = self.context.socket(zmq.PUB)
         self.publisher.bind('tcp://*:%i' % port)
 
-    def expect_display(self, text, id=0, timeout=10000):
+    # TODO: move to event-based system
+    def read_event(self, timeout=10000):
         try:
             if self.watcher.poll(timeout=timeout):
                 incoming = self.sync_recv()
@@ -61,10 +64,7 @@ class Controller(Qber):
                 sender_id = int(incoming[0])
                 msg = incoming[2:]
                 self.sync_send('')
-                if msg == text and id == sender_id :
-                    return
-                else:
-                    raise ValueError('Ugh! got %s from %i' % (msg, sender_id))
+                return Event(sender_id, 'display', msg)
         except KeyboardInterrupt:
             sys.exit(-1)
         raise Exception('Timed out waiting for %s to display' % text)

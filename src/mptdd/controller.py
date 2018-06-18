@@ -55,7 +55,6 @@ class Controller(Qber):
         self.publisher = self.context.socket(zmq.PUB)
         self.publisher.bind('tcp://*:%i' % port)
 
-    # TODO: move to event-based system
     def read_event(self, timeout=10000):
         try:
             if self.watcher.poll(timeout=timeout):

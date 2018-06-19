@@ -16,5 +16,5 @@ class ControllerTest(TestCase):
         self.controller.run('tests/e2e/button_print.py')
         self.controller.publish_command('button_a')
         event = self.controller.read_event()
-        assert_that(event, is_event(0, 'display', 'Ouch!'))
+        assert_that(event, is_event('0', 'display', 'Ouch!'))
         self.controller.close()

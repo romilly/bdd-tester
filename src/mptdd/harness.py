@@ -2,11 +2,48 @@
 #  Synchronized subscriber
 #
 import sys
+from abc import ABCMeta, abstractmethod
+
 import zmq
 import logging
 
 from mptdd.helpers import event_message, event
 from mptdd.quber import Qber
+
+
+class CommandHandler(metaclass=ABCMeta):
+    def __init__(self, harness, successor=None):
+        self._harness = harness
+        self._successor = successor
+
+    def command(self, event):
+        if self.handle_command(event):
+            return
+        if self._successor:
+            self._successor.handle_command(event)
+        raise Exception('No handler for %s' % event)
+
+    @abstractmethod
+    def handle_command(self, event):
+        pass
+
+
+class Terminator(CommandHandler):
+    def handle_command(self, event):
+        if event.e_type == 'END':
+            logging.info('done')
+            logging.shutdown()
+            sys.exit(0)
+        else:
+            return False
+
+
+class ButtonHandler(CommandHandler):
+    def handle_command(self, event):
+        if event.e_type.startswith('button'):
+            self._harness.callback(event.e_type)._pressed = True
+            return True
+
 
 
 class Harness(Qber):
@@ -18,12 +55,12 @@ class Harness(Qber):
                             format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
         logging.info('Starting test run')
         self.subscribe(5561)
-        self.id = int(self.sync(5562))
-        logging.debug('my id is %i' % self.id)
+        self.id = self.sync(5562)
+        logging.debug('my id is %s' % self.id)
+        self.handler_chain = ButtonHandler(self, Terminator(self))
 
     def add_callback(self, key, object):
         self._callbacks[key] = object
-
 
     def run(self):
         logging.debug('run')
@@ -32,13 +69,7 @@ class Harness(Qber):
                 command = self.receive_command()
             else:
                 return
-            # TODO: use chain of command
-            if command.e_type == 'END':
-                logging.info('done')
-                logging.shutdown()
-                sys.exit(0)
-            if command.e_type in ['button_a', 'button_b']:
-                self.callback(command.e_type)._pressed = True
+            self.handler_chain.command(command)
         except Exception as e:
             logging.exception(e)
             logging.shutdown()
@@ -74,7 +105,7 @@ class Harness(Qber):
     def receive_command(self):
             incoming = self.sub_recv()
             logging.debug(incoming)
-            logging.debug('bit %i got %s' % (self.id, incoming))
+            logging.debug('bit %s got %s' % (self.id, incoming))
             return event(incoming)
 
 

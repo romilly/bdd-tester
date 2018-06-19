@@ -20,26 +20,24 @@ class Controller(Qber):
 
     def run(self, *scripts):
         logging.info('Starting test run')
-        micro_count = len(scripts)
         self.bind_publisher(5561)
-        self.watcher = self.context.socket(zmq.REP)
-        self.watcher.bind('tcp://*:5562')
-        id = 0
+        self.bind_watcher('5562')
+        self.start_microbits(scripts)
+
+    def start_microbits(self, scripts):
+        micro_count = len(scripts)
         logging.debug('Waiting for %i micro%s' % (micro_count, '' if micro_count == 1 else 's'))
-        self.start_scripts(scripts)
-        while id < micro_count:
-            self.sync_recv() # wait for micro
-            self.sync_send('%i' % id)
-            id += 1
+        for (id, script) in enumerate(scripts):
+            self.processes.append(subprocess.Popen(['python'] + [script],
+                                                   cwd='/home/romilly/git/active/bdd-tester',
+                                                   stdout=subprocess.PIPE))
+            self.sync_recv()  # wait for micro
+            self.sync_send('%i' % id)  # tell it its id
             logging.debug("+1 micro (%i/%i)" % (id, micro_count))
 
-    def start_scripts(self, scripts):
-        for script in scripts:
-            print(script)
-            self.processes.append(subprocess.Popen(['python'] + [script],
-                                              cwd='/home/romilly/git/active/bdd-tester',
-                                              stdout=subprocess.PIPE))
-
+    def bind_watcher(self, s):
+        self.watcher = self.context.socket(zmq.REP)
+        self.watcher.bind('tcp://*:%s' % s)
 
     def sync_send(self, message):
         self.send(self.watcher, message)

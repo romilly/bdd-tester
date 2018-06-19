@@ -1,11 +1,12 @@
+from collections import namedtuple
+
 import subprocess
 import sys
 import zmq
 
-from mptdd.helpers import event, event_message
+from mptdd.helpers import event, event_message, DEFAULT_NAME
 from mptdd.quber import Qber
 import logging
-
 
 class MicrobitController(Qber):
     def __init__(self, log_level=logging.DEBUG):
@@ -15,22 +16,22 @@ class MicrobitController(Qber):
         logging.basicConfig(filename='../../logs/testing.log', level=log_level,
                             format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
-    def run(self, *scripts):
+    def run(self, *targets):
         logging.info('Starting test run')
         self.bind_publisher(5561)
         self.bind_watcher('5562')
-        self.start_microbits(scripts)
+        self.start_microbits(targets)
 
-    def start_microbits(self, scripts):
-        micro_count = len(scripts)
+    def start_microbits(self, targets):
+        micro_count = len(targets)
         logging.debug('Waiting for %i micro%s' % (micro_count, '' if micro_count == 1 else 's'))
-        for (id, script) in enumerate(scripts):
-            self.processes.append(subprocess.Popen(['python'] + [script],
+        for target in targets:
+            self.processes.append(subprocess.Popen(['python'] + [target.script],
                                                    cwd='/home/romilly/git/active/bdd-tester',
                                                    stdout=subprocess.PIPE))
             self.sync_recv()  # wait for micro
-            self.sync_send('%i' % id)  # tell it its id
-            logging.debug("+1 micro (%i/%i)" % (id, micro_count))
+            self.sync_send(target.id)  # tell it its id
+            logging.debug("added microbit %s" % target.id)
 
     def bind_watcher(self, s):
         self.watcher = self.context.socket(zmq.REP)
@@ -72,6 +73,6 @@ class MicrobitController(Qber):
             self.outputs += [process.communicate()]
         logging.info('finished test run')
 
-    def publish_command(self, command, to='0', value=''):
-        self.publish(event_message(to, command, value))
+    def publish_command(self, command, value='', id=DEFAULT_NAME):
+        self.publish(event_message(command, value, id))
 

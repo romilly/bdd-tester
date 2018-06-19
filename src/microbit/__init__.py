@@ -35,7 +35,6 @@ from . import (display as display,
 from mptdd.harness import _harness
 
 
-
 from typing import Any, overload
 
 import time

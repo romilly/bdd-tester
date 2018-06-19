@@ -91,7 +91,7 @@ class Harness(Qber):
         self.send(self.syncclient, message)
 
     def send_message(self, e_type, message):
-        self.sync_send(event_message(self.id, e_type, message))
+        self.sync_send(event_message(e_type, message, self.id))
         return self.sync_recv()
 
     def subscribe(self, port):

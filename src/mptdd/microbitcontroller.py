@@ -12,7 +12,7 @@ class MicrobitController(Qber):
         Qber.__init__(self)
         self.processes = []
         self.outputs = []
-        logging.basicConfig(filename='testing.log', level=log_level,
+        logging.basicConfig(filename='../../logs/testing.log', level=log_level,
                             format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
     def run(self, *scripts):

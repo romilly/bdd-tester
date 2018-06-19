@@ -1,7 +1,6 @@
 #
 #  Synchronized subscriber
 #
-import json
 import sys
 import zmq
 import logging
@@ -15,7 +14,7 @@ class Harness(Qber):
         Qber.__init__(self)
         self.subsock = None
         self._callbacks = {}
-        logging.basicConfig(filename='testing1.log', level=logging.DEBUG,
+        logging.basicConfig(filename='logs/testing1.log', level=logging.DEBUG,
                             format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
         logging.info('Starting test run')
         self.subscribe(5561)

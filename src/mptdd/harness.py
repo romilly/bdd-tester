@@ -6,7 +6,7 @@ import sys
 import zmq
 import logging
 
-from mptdd.helpers import event_message
+from mptdd.helpers import event_message, event
 from mptdd.quber import Qber
 
 
@@ -20,24 +20,30 @@ class Harness(Qber):
         logging.info('Starting test run')
         self.subscribe(5561)
         self.id = int(self.sync(5562))
-        print('my id is %i' % self.id)
-        self.re_subscribe()
+        logging.debug('my id is %i' % self.id)
 
     def add_callback(self, key, object):
         self._callbacks[key] = object
 
 
     def run(self):
-        print('run')
-        if self.subsock.poll():
-            msg = self.pub_receive()
-        else:
-            return
-        if msg == 'END':
-            logging.info('done')
-            sys.exit(0)
-        if msg in ['button_a', 'button_b']:
-            self.callback(msg)._pressed = True
+        logging.debug('run')
+        try:
+            if self.subsock.poll():
+                command = self.receive_command()
+            else:
+                return
+            # TODO: use chain of command
+            if command.e_type == 'END':
+                logging.info('done')
+                logging.shutdown()
+                sys.exit(0)
+            if command.e_type in ['button_a', 'button_b']:
+                self.callback(command.e_type)._pressed = True
+        except Exception as e:
+            logging.exception(e)
+            logging.shutdown()
+            sys.exit(-2)
 
     def sub_recv(self):
         return self.recv(self.subsock)
@@ -66,22 +72,12 @@ class Harness(Qber):
     def callback(self, key):
         return self._callbacks[key]
 
-    def pub_receive(self):
-        incoming = self.sub_recv()
-        logging.debug(incoming)
-        print('bit %i got %s' % (self.id, incoming))
-        target_id =incoming[0]
-        msg = incoming[2:]
-        if target_id == str(self.id) or target_id == '*':
-            return msg
-        else:
-            return None
+    def receive_command(self):
+            incoming = self.sub_recv()
+            logging.debug(incoming)
+            logging.debug('bit %i got %s' % (self.id, incoming))
+            return event(incoming)
 
-    def re_subscribe(self):
-        logging.debug('id set to %i' % self.id)
-        self.subsock.setsockopt(zmq.UNSUBSCRIBE, b'')
-        self.subsock.setsockopt(zmq.SUBSCRIBE, b'*') # radio messages
-        self.subsock.setsockopt(zmq.SUBSCRIBE, str(self.id).encode('utf8'))
 
 
 

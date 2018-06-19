@@ -2,7 +2,7 @@ import subprocess
 import sys
 import zmq
 
-from mptdd.helpers import event
+from mptdd.helpers import event, event_message
 from mptdd.quber import Qber
 import logging
 
@@ -42,16 +42,15 @@ class MicrobitController(Qber):
     def sync_recv(self):
         return self.recv(self.watcher)
 
-    def publish(self, message, id='0'):
-        text = '%s:%s' % (id, message)
-        logging.debug(text)
-        self.send(self.publisher, text)
+    def publish(self, message):
+        logging.debug(message)
+        self.send(self.publisher, message)
 
     def bind_publisher(self, port):
         self.publisher = self.context.socket(zmq.PUB)
         self.publisher.bind('tcp://*:%i' % port)
 
-    def read_event(self, timeout=10000):
+    def read_event(self, timeout=1000):
         try:
             if self.watcher.poll(timeout=timeout):
                 incoming = self.sync_recv()
@@ -60,13 +59,19 @@ class MicrobitController(Qber):
                 return event(incoming)
         except KeyboardInterrupt:
             sys.exit(-1)
-        raise Exception('Timed out waiting for event')
+        except TimeoutError:
+            logging.error('Timed out waiting for event')
+            self.close()
+            sys.exit(-2)
 
 
     def close(self):
-        self.publish('END', '*')
+        self.publish_command('END', '*')
         for process in self.processes:
             process.wait()
             self.outputs += [process.communicate()]
         logging.info('finished test run')
+
+    def publish_command(self, command, to='0', value=''):
+        self.publish(event_message(to, command, value))
 

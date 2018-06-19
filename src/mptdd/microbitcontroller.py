@@ -1,13 +1,11 @@
-import json
-from collections import namedtuple
-
 import subprocess
 import sys
 import zmq
 
-from mptdd.helpers import Event, event
+from mptdd.helpers import event
 from mptdd.quber import Qber
 import logging
+
 
 class MicrobitController(Qber):
     def __init__(self, log_level=logging.DEBUG):

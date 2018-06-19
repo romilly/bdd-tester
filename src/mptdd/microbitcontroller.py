@@ -9,8 +9,7 @@ from mptdd.helpers import Event, event
 from mptdd.quber import Qber
 import logging
 
-# TODO: rename to MicrobitController
-class Controller(Qber):
+class MicrobitController(Qber):
     def __init__(self, log_level=logging.DEBUG):
         Qber.__init__(self)
         self.processes = []

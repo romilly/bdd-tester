@@ -4,7 +4,7 @@ from unittest import TestCase
 from hamcrest import assert_that
 from hamcrest.core.base_matcher import BaseMatcher
 
-from mptdd.controller import Controller, Event
+from mptdd.microbitcontroller import MicrobitController, Event
 
 sys.path += '/home/romilly/git/active/bdd-tester/src'
 
@@ -33,7 +33,7 @@ def is_event(id, e_type, value):
 
 class ControllerTest(TestCase):
     def setUp(self):
-        self.controller = Controller()
+        self.controller = MicrobitController()
 
     def test_button_and_display(self):
         self.controller.run('tests/e2e/button_print.py')

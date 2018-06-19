@@ -6,7 +6,7 @@ import sys
 import zmq
 import logging
 
-from mptdd.controller import Event
+from mptdd.helpers import event_message
 from mptdd.quber import Qber
 
 
@@ -55,8 +55,7 @@ class Harness(Qber):
         self.send(self.syncclient, message)
 
     def send_message(self, e_type, message):
-        event = Event(self.id, e_type, message)
-        self.sync_send(json.dumps(event))
+        self.sync_send(event_message(self.id, e_type, message))
         return self.sync_recv()
 
     def subscribe(self, port):

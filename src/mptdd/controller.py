@@ -4,10 +4,10 @@ from collections import namedtuple
 import subprocess
 import sys
 import zmq
+
+from mptdd.helpers import Event, event
 from mptdd.quber import Qber
 import logging
-
-Event = namedtuple('Event',['id','e_type','value'])
 
 # TODO: rename to MicrobitController
 class Controller(Qber):
@@ -60,15 +60,13 @@ class Controller(Qber):
         try:
             if self.watcher.poll(timeout=timeout):
                 incoming = self.sync_recv()
-                logging.debug('incoming %s' % incoming)
-                # sender_id = int(incoming[0])
-                # msg = incoming[2:]
-                logging.debug(incoming)
+                logging.debug('incoming event %s' % incoming)
                 self.sync_send('')
-                return Event(*json.loads(incoming))
+                return event(incoming)
         except KeyboardInterrupt:
             sys.exit(-1)
         raise Exception('Timed out waiting for event')
+
 
     def close(self):
         self.publish('END', '*')

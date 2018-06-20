@@ -1,26 +1,29 @@
-from collections import namedtuple
-
-import subprocess
-import sys
-import zmq
-
-from mptdd.helpers import event, event_message, DEFAULT_NAME
-from mptdd.quber import Qber
 import logging
+import sys
+import subprocess
+import zmq
+from mpbdd.helpers import event
+from mpbdd.quber import Qber
 
-class MicrobitController(Qber):
-    def __init__(self, log_level=logging.DEBUG):
+
+class MicrobitPort(Qber):
+    def __init__(self):
         Qber.__init__(self)
         self.processes = []
         self.outputs = []
-        logging.basicConfig(filename='../../logs/testing.log', level=log_level,
-                            format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
-    def run(self, *targets):
-        logging.info('Starting test run')
+    def open(self, targets):
         self.bind_publisher(5561)
         self.bind_watcher('5562')
         self.start_microbits(targets)
+
+    def bind_publisher(self, port):
+        self.publisher = self.context.socket(zmq.PUB)
+        self.publisher.bind('tcp://*:%i' % port)
+
+    def bind_watcher(self, s):
+        self.watcher = self.context.socket(zmq.REP)
+        self.watcher.bind('tcp://*:%s' % s)
 
     def start_microbits(self, targets):
         micro_count = len(targets)
@@ -33,23 +36,8 @@ class MicrobitController(Qber):
             self.sync_send(target.id)  # tell it its id
             logging.debug("added microbit %s" % target.id)
 
-    def bind_watcher(self, s):
-        self.watcher = self.context.socket(zmq.REP)
-        self.watcher.bind('tcp://*:%s' % s)
-
     def sync_send(self, message):
         self.send(self.watcher, message)
-
-    def sync_recv(self):
-        return self.recv(self.watcher)
-
-    def publish(self, message):
-        logging.debug(message)
-        self.send(self.publisher, message)
-
-    def bind_publisher(self, port):
-        self.publisher = self.context.socket(zmq.PUB)
-        self.publisher.bind('tcp://*:%i' % port)
 
     def read_event(self, timeout=1000):
         try:
@@ -65,14 +53,15 @@ class MicrobitController(Qber):
             self.close()
             sys.exit(-2)
 
+    def sync_recv(self):
+        return self.recv(self.watcher)
+
+    def publish(self, message):
+        logging.debug(message)
+        self.send(self.publisher, message)
 
     def close(self):
-        self.publish_command('END', '*')
         for process in self.processes:
             process.wait()
             self.outputs += [process.communicate()]
         logging.info('finished test run')
-
-    def publish_command(self, command, value='', id=DEFAULT_NAME):
-        self.publish(event_message(command, value, id))
-

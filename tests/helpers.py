@@ -1,6 +1,6 @@
 from hamcrest.core.base_matcher import BaseMatcher
 
-from mptdd.helpers import Event, DEFAULT_NAME
+from mpbdd.helpers import Event, DEFAULT_NAME
 
 
 class EventMatcher(BaseMatcher):

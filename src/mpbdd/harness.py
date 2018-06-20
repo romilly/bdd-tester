@@ -7,8 +7,8 @@ from abc import ABCMeta, abstractmethod
 import zmq
 import logging
 
-from mptdd.helpers import event_message, event
-from mptdd.quber import Qber
+from mpbdd.helpers import event_message, event
+from mpbdd.quber import Qber
 
 
 class CommandHandler(metaclass=ABCMeta):

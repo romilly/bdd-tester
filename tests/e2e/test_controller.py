@@ -3,8 +3,8 @@ from unittest import TestCase
 from hamcrest import assert_that
 
 from helpers import is_event
-from mptdd.helpers import Target
-from mptdd.microbitcontroller import MicrobitController
+from mpbdd.helpers import Target
+from mpbdd.microbitcontroller import MicrobitController
 
 sys.path += '/home/romilly/git/active/bdd-tester/src'
 

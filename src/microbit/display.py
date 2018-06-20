@@ -9,7 +9,7 @@ you can use::
     microbit.display.scroll('Hello!', wait=False, loop=True)
 """
 
-from mptdd.harness import _harness
+from mpbdd.harness import _harness
 
 from typing import overload
 

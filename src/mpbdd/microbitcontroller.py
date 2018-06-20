@@ -1,7 +1,13 @@
+from time import sleep
+
 from mpbdd.helpers import event, event_message, DEFAULT_NAME
 from mpbdd.microbit_port import MicrobitPort
 import logging
 
+DOWN = 'down'
+UP = 'up'
+BUTTON_A = 'button_a'
+BUTTON_B = 'button_b'
 
 class MicrobitController():
     def __init__(self, log_level=logging.DEBUG):
@@ -14,11 +20,16 @@ class MicrobitController():
         self.port.open(targets)
 
     def close(self):
-        self.publish_command('END', '*')
+        self._publish_command('END', '*')
         self.port.close()
 
-    def publish_command(self, command, value='', id=DEFAULT_NAME):
-        self.port.publish(event_message(command, value, id))
+    def press(self, button, target=DEFAULT_NAME, duration_ms=50):
+        self._publish_command(button, DOWN, target)
+        sleep(duration_ms/1000.0)
+        self._publish_command(button, UP, target)
+
+    def _publish_command(self, command, value='', target=DEFAULT_NAME):
+        self.port.publish(event_message(command, value, target))
 
     def read_event(self):
         return self.port.read_event()

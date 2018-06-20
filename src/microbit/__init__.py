@@ -86,7 +86,8 @@ class Button:
 
     def _set_pressed(self, boolean):
         self._pressed = boolean
-        self._count += 1
+        if boolean:
+            self._count += 1
 
     def is_pressed(self) -> bool:
         """returns True or False to indicate if the button is pressed at the time of

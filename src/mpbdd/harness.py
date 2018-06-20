@@ -8,6 +8,7 @@ import zmq
 import logging
 
 from mpbdd.helpers import event_message, event
+from mpbdd.microbitcontroller import DOWN, BUTTON_A, BUTTON_B
 from mpbdd.quber import Qber
 
 
@@ -40,8 +41,8 @@ class Terminator(CommandHandler):
 
 class ButtonHandler(CommandHandler):
     def handle_command(self, event):
-        if event.e_type.startswith('button'):
-            self._harness.callback(event.e_type)._pressed = True
+        if event.e_type in [BUTTON_A, BUTTON_B]:
+            self._harness.callback(event.e_type)._pressed = (event.message == DOWN)
             return True
 
 

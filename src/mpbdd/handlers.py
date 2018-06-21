@@ -17,7 +17,7 @@ class CommandHandler(metaclass=ABCMeta):
         if self.handle_command(event):
             return True
         if self._successor:
-            return self._successor.handle_command(event)
+            return self._successor.command(event)
         return False
 
     @abstractmethod
@@ -48,8 +48,6 @@ class ButtonHandler(CommandHandler):
     def handle_command(self, event):
         self.monitor.debug('checking button event')
         if event.e_type in [BUTTON_A, BUTTON_B]:
-            # button = self._harness.callback(event.e_type)
-            # button._set_pressed(event.message == DOWN)
             self._harness.button_event(event)
             return True
         return False

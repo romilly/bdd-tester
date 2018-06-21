@@ -22,7 +22,7 @@ class Harness(Qber):
         self.subscribe(5561)
         self.id = self.sync(5562)
         self.monitor.debug('my name is %s' % self.id)
-        self.handler = Terminator(self, FilteringHandler(self, ButtonHandler(self)))
+        self.handler_chain = Terminator(self, FilteringHandler(self, ButtonHandler(self)))
 
     def add_callback(self, key, object):
         # self.monitor.debug('adding callback %s = %s' % (key, str(object)))
@@ -35,7 +35,7 @@ class Harness(Qber):
             if self.subsock.poll():
                 self.monitor.debug('incoming message')
                 command = self.receive_command()
-                if not self.handler.command(command):
+                if not self.handler_chain.command(command):
                     self.monitor.error('No handler for %s' % str(event))
                     raise MissingHandlerException('No handler for %s' % str(event))
 

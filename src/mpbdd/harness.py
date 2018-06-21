@@ -1,47 +1,24 @@
 import sys
-from abc import ABCMeta, abstractmethod
 import zmq
 
 from mpbdd.handlers import Terminator, FilteringHandler, ButtonHandler, MissingHandlerException
 from mpbdd.helpers import event_message, event
-from mpbdd.microbitcontroller import DOWN, BUTTON_A, BUTTON_B
+from mpbdd.microbitcontroller import DOWN
 from mpbdd.monitors import LoggingMonitor
 from mpbdd.quber import Qber
 
-class Harness(Qber):
-    def __init__(self, harness_monitor=None):
+
+class HarnessPort(Qber):
+    def __init__(self, monitor):
         Qber.__init__(self)
-        self.id = ''
-        if not harness_monitor:
-            harness_monitor = LoggingMonitor(self, 'logs/testing.log')
-        self.monitor = harness_monitor
-        self.monitor=harness_monitor
+        self.monitor = monitor
         self.subsock = None
-        self._callbacks = {}
-        self.monitor.info('Harness created')
         self.subscribe(5561)
-        self.id = self.sync(5562)
+        self.set_id(self.sync(5562))
         self.monitor.debug('my name is %s' % self.id)
-        self.handler_chain = Terminator(self, FilteringHandler(self, ButtonHandler(self)))
 
-    def add_callback(self, key, object):
-        # self.monitor.debug('adding callback %s = %s' % (key, str(object)))
-        self._callbacks[key] = object
-
-    def run(self):
-        self.monitor.debug('Harness running')
-        while True:
-            self.monitor.debug('checking for message')
-            if self.subsock.poll():
-                self.monitor.debug('incoming message')
-                command = self.receive_command()
-                if not self.handler_chain.command(command):
-                    self.monitor.error('No handler for %s' % str(event))
-                    raise MissingHandlerException('No handler for %s' % str(event))
-
-    def button_event(self, event):
-        button = self.callback(event.e_type)
-        button._set_pressed(event.message == DOWN)
+    def set_id(self, id):
+        self.id = id
 
     def sub_recv(self):
         return self.recv(self.subsock)
@@ -69,18 +46,62 @@ class Harness(Qber):
         self.subsock.connect('tcp://localhost:%i' % port)
         self.subsock.setsockopt(zmq.SUBSCRIBE, b'')
 
+    def receive_command(self):
+        incoming = self.sub_recv()
+        self.monitor.debug('got %s' % str(incoming))
+        return event(incoming)
+
+
+class Harness():
+    def __init__(self, monitor=None):
+        self.id = ''
+        if not monitor:
+            monitor = LoggingMonitor(self, 'logs/testing.log')
+        self.monitor = monitor
+        self.port = HarnessPort(monitor)
+        self.id = self.port.id
+        self._callbacks = {}
+        self.monitor.info('Harness created')
+        self.handler_chain = Terminator(self, FilteringHandler(self, ButtonHandler(self)))
+
+    def add_callback(self, key, object):
+        # self.monitor.debug('adding callback %s = %s' % (key, str(object)))
+        self._callbacks[key] = object
+
+    def run(self):
+        self.monitor.debug('Harness running')
+        while True:
+            self.monitor.debug('checking for message')
+            if self.incoming():
+                self.monitor.debug('incoming message')
+                command = self.receive_command()
+                self.monitor.debug('command is %s' % str(command))
+                if not self.handler_chain.command(command):
+                    self.monitor.error('No handler for %s' % str(event))
+                    raise MissingHandlerException('No handler for %s' % str(event))
+
+    def incoming(self):
+        return self.port.subsock.poll()
+
+    def button_event(self, event):
+        button = self.callback(event.e_type)
+        button._set_pressed(event.message == DOWN)
+
+
     def callback(self, key):
         return self._callbacks[key]
 
-    def receive_command(self):
-        incoming = self.sub_recv()
-        self.monitor.debug('got %s' % incoming)
-        return event(incoming)
 
     def end(self):
         self.monitor.info('done')
         self.monitor.shutdown()
         sys.exit(0)
+
+    def receive_command(self):
+        return self.port.receive_command()
+
+    def send_message(self, e_type, message):
+        return self.port.send_message(e_type, message)
 
 
 _harness = Harness()

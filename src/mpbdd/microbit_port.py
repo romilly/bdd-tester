@@ -1,4 +1,3 @@
-import logging
 import sys
 import subprocess
 import zmq
@@ -7,8 +6,9 @@ from mpbdd.quber import Qber
 
 
 class MicrobitPort(Qber):
-    def __init__(self):
+    def __init__(self, monitor):
         Qber.__init__(self)
+        self.monitor = monitor
         self.processes = []
         self.outputs = []
 
@@ -27,14 +27,14 @@ class MicrobitPort(Qber):
 
     def start_microbits(self, targets):
         micro_count = len(targets)
-        logging.debug('Waiting for %i micro%s' % (micro_count, '' if micro_count == 1 else 's'))
+        self.monitor.debug('Waiting for %i micro%s' % (micro_count, '' if micro_count == 1 else 's'))
         for target in targets:
             self.processes.append(subprocess.Popen(['python'] + [target.script],
                                                    cwd='/home/romilly/git/active/bdd-tester',
                                                    stdout=subprocess.PIPE))
             self.sync_recv()  # wait for micro
             self.sync_send(target.id)  # tell it its id
-            logging.debug("added microbit %s" % target.id)
+            self.monitor.debug("added %s" % target.id)
 
     def sync_send(self, message):
         self.send(self.watcher, message)
@@ -43,13 +43,13 @@ class MicrobitPort(Qber):
         try:
             if self.watcher.poll(timeout=timeout):
                 incoming = self.sync_recv()
-                logging.debug('incoming event %s' % incoming)
+                self.monitor.debug('sees incoming event %s' % incoming)
                 self.sync_send('')
                 return event(incoming)
         except KeyboardInterrupt:
             sys.exit(-1)
         except TimeoutError:
-            logging.error('Timed out waiting for event')
+            self.monitor.error('Timed out waiting for event')
             self.close()
             sys.exit(-2)
 
@@ -57,11 +57,12 @@ class MicrobitPort(Qber):
         return self.recv(self.watcher)
 
     def publish(self, message):
-        logging.debug(message)
+        self.monitor.debug('sending %s' % message)
         self.send(self.publisher, message)
 
     def close(self):
         for process in self.processes:
-            process.wait()
-            self.outputs += [process.communicate()]
-        logging.info('finished test run')
+            # TODO: terminate only if still running
+            process.terminate()
+            self.outputs += [process.communicate()[0].decode('utf8')]
+        self.monitor.debug('outputs: %s' % self.outputs)

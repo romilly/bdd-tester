@@ -29,16 +29,20 @@ Note that the API exposes integers only (ie no floats are needed, but they may
 be accepted).  We thus use milliseconds for the standard time unit.
 """
 
+import threading
+
+from mpbdd.microbitcontroller import BUTTON_A, BUTTON_B, DOWN, UP
 from . import (display as display,
     # uart as uart, spi as spi, i2c as i2c, accelerometer as accelerometer, compass as compass
     )
 from mpbdd.harness import _harness
 
+monitor = _harness.monitor
+
 
 from typing import Any, overload
 
 import time
-
 
 def panic(n: int) -> None:
     """Enter a panic mode. Requires restart. Pass in an arbitrary integer <= 255
@@ -80,21 +84,29 @@ class Button:
         This class is not actually available to the user, it is only used by
         the two button instances, which are provided already initialized.
         """
-    def __init__(self):
+    def __init__(self, name):
         self._pressed = False
         self._count = 0
+        self.name = name
 
-    def _set_pressed(self, boolean):
-        self._pressed = boolean
-        if boolean:
+    def _set_pressed(self, b):
+        monitor.debug('setting button %s to be %s' % (self.name, str(b)))
+        self._pressed = b
+        if b:
             self._count += 1
 
     def is_pressed(self) -> bool:
         """returns True or False to indicate if the button is pressed at the time of
         the method call.
         """
-        _harness.run()
+        # logging.debug('is_pressed invoked')
         return self._pressed
+
+    def state(self):
+        return DOWN if self._pressed else UP
+
+    def __str__(self):
+        return 'Button %s - %s' % (self.name, self.state())
 
     def was_pressed(self) -> bool:
         """ returns True or False to indicate if the button was pressed since the device
@@ -113,12 +125,13 @@ class Button:
         return result
 
 
-button_a = Button()
+button_a = Button('A')
 """A ``Button`` instance (see below) representing the left button."""
-_harness.add_callback('button_a', button_a)
+_harness.add_callback(BUTTON_A, button_a)
 
-button_b = Button()
+button_b = Button('B')
 """Represents the right button."""
+_harness.add_callback(BUTTON_B, button_b)
 
 
 class MicroBitDigitalPin:
@@ -435,3 +448,7 @@ class Image:
         """Create a new image by multiplying the brightness of each pixel by
         ``n``.
         """
+
+hthread = threading.Thread(group=None, target=_harness.run)
+hthread.start()
+running = True

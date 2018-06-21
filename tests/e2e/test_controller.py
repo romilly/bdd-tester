@@ -20,12 +20,12 @@ class ControllerTest(TestCase):
         self.controller.press(BUTTON_A)
         event = self.controller.read_event()
         assert_that(event, is_event('display', 'Ouch!'))
-        # self.controller.press(BUTTON_A, 'bit 2')
-        # event = self.controller.read_event()
-        # assert_that(event, is_event('display', 'Ouch!', 'bit 2'))
-        # self.controller.press(BUTTON_B)
-        # event = self.controller.read_event()
-        # assert_that(event, is_event('display', 'That hurt!'))
+        self.controller.press(BUTTON_A, 'microbit 2')
+        event = self.controller.read_event()
+        assert_that(event, is_event('display', 'Ouch!', 'microbit 2'))
+        self.controller.press(BUTTON_B)
+        event = self.controller.read_event()
+        assert_that(event, is_event('display', 'That hurt!'))
 
     def tearDown(self):
         self.controller.close()

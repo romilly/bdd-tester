@@ -1,5 +1,4 @@
 import sys
-from time import sleep
 from unittest import TestCase
 from hamcrest import assert_that
 

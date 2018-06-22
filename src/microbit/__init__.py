@@ -32,17 +32,13 @@ be accepted).  We thus use milliseconds for the standard time unit.
 import threading
 
 from mpbdd.microbitcontroller import BUTTON_A, BUTTON_B, DOWN, UP
-from . import (display as display,
-    # uart as uart, spi as spi, i2c as i2c, accelerometer as accelerometer, compass as compass
-    )
+from . import (display as display)
+               # uart as uart , spi as spi, i2c as i2c, accelerometer as accelerometer, compass as compass)
 from mpbdd.harness import _harness
+from typing import Any, overload
+import time
 
 monitor = _harness.monitor
-
-
-from typing import Any, overload
-
-import time
 
 def panic(n: int) -> None:
     """Enter a panic mode. Requires restart. Pass in an arbitrary integer <= 255
@@ -448,6 +444,7 @@ class Image:
         """Create a new image by multiplying the brightness of each pixel by
         ``n``.
         """
+
 
 hthread = threading.Thread(group=None, target=_harness.run)
 hthread.start()

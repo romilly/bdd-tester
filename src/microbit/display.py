@@ -10,7 +10,6 @@ you can use::
 """
 
 from mpbdd.harness import _harness
-
 from typing import overload
 
 

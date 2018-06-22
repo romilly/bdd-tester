@@ -20,15 +20,11 @@ class Monitor():
         pass
 
 
-
-
 class LoggingMonitor():
     def __init__(self, target, filename):
         self.target = target
-        # TODO: set width of level field
-        # TODO: add module info?
         logging.basicConfig(filename=filename, level=logging.DEBUG,
-                            format='%(asctime)s - %(levelname)s - %(message)s')
+                            format='%(asctime)s - %(levelname)10s - %(message)s')
 
     def prefix(self, message):
         return '%s %s' % (self.target.id, message)

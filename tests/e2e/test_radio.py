@@ -1,7 +1,7 @@
 import sys
 from unittest import TestCase
 
-from hamcrest import assert_that
+from hamcrest import assert_that, none, not_none
 
 from helpers import is_event
 from mpbdd.helpers import Target
@@ -26,10 +26,10 @@ class ControllerTest(TestCase):
     def test_filter_own_own_transmissions(self):
         self.controller.run(Target('tests/e2e/button_radio.py'), Target('tests/e2e/button_radio.py', 'microbit 2'))
         self.controller.press(BUTTON_A)
-        event = self.controller.read_event()
-        assert_that(event, is_event('display', 'signal received!', 'microbit 2'))
-        # assert_that(event, is_event('display', 'signal received!', 'microbit 1'))
+        event = self.controller.read_event() # checked in test above
+        assert_that(event, not_none())
+        event = self.controller.read_event() # should be no other event
+        assert_that(event, none())
 
     def tearDown(self):
         self.controller.close()
-        # sleep(2)

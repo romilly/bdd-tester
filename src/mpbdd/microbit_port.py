@@ -39,8 +39,6 @@ class ControllerPort(Qber):
     def close(self):
         self.monitor.debug('closing publisher, watcher')
         self.context.destroy()
-        # sleep(0.1)
-        # self.context.term()
 
 
 class ControllerRadioPort(ControllerPort):

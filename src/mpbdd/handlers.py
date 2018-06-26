@@ -25,6 +25,16 @@ class CommandHandler(metaclass=ABCMeta):
         pass
 
 
+class DigitalPinHandler(CommandHandler):
+    def handle_command(self, event):
+        self.monitor.debug('checking for pin event %s' % str(event))
+        if event.e_type in range(1,17):
+            self._harness.read_digital_event(event)
+            return True
+        return False
+
+
+
 class FilteringHandler(CommandHandler):
     def handle_command(self, event):
         remove = event.id != self._harness.id

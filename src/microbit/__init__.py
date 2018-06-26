@@ -140,6 +140,8 @@ class MicroBitDigitalPin:
     """
     def __init__(self, pinnum):
         self._pinnum = pinnum
+        self._state = 0
+        _harness.add_callback(pinnum, self)
 
     NO_PULL = 0
     PULL_UP = 1
@@ -147,6 +149,7 @@ class MicroBitDigitalPin:
 
     def read_digital(self) -> int:
         """Return 1 if the pin is high, and 0 if it's low."""
+        return self._state
 
     def set_pull(self, value: int = (NO_PULL or PULL_UP or PULL_DOWN)) -> None:
         """Set the pull state to one of three possible values: ``pin.PULL_UP``,
@@ -219,6 +222,7 @@ pin7 = MicroBitDigitalPin(7)
 """Row 1."""
 
 pin8 = MicroBitDigitalPin(8)
+
 
 pin9 = MicroBitDigitalPin(9)
 """Row 3."""

@@ -5,7 +5,6 @@ import radio
 def run():
     radio.on()
     while True:
-        # print('going to check button a')
         if button_a.is_pressed():
             print('button A pressed')
             radio.send('Ouch!')

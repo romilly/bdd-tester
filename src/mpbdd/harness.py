@@ -9,6 +9,7 @@ from mpbdd.helpers import event_message, event
 from mpbdd.microbitcontroller import DOWN
 from mpbdd.monitors import LoggingMonitor
 
+
 class Harness():
     def __init__(self, monitor=None):
         self.id = ''
@@ -53,6 +54,8 @@ class Harness():
     def end(self):
         self.monitor.info('done')
         self.monitor.shutdown()
+        self.port.close()
+        self.radio_port.close()
         sys.exit(0)
 
     def receive_command(self):

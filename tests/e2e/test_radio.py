@@ -23,5 +23,13 @@ class ControllerTest(TestCase):
         event = self.controller.read_event()
         assert_that(event, is_event('display', 'signal received!', 'microbit 2'))
 
+    def test_filter_own_own_transmissions(self):
+        self.controller.run(Target('tests/e2e/button_radio.py'), Target('tests/e2e/button_radio.py', 'microbit 2'))
+        self.controller.press(BUTTON_A)
+        event = self.controller.read_event()
+        assert_that(event, is_event('display', 'signal received!', 'microbit 2'))
+        # assert_that(event, is_event('display', 'signal received!', 'microbit 1'))
+
     def tearDown(self):
         self.controller.close()
+        # sleep(2)

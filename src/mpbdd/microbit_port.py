@@ -8,7 +8,7 @@ import zmq
 from mpbdd.quber import Qber
 
 
-class Port(Qber):
+class ControllerPort(Qber):
     def __init__(self, monitor, publisher_port, watcher_port):
         Qber.__init__(self, monitor)
         self.context = zmq.Context()
@@ -18,10 +18,12 @@ class Port(Qber):
 
     def bind_publisher(self, port):
         self.publisher = self.context.socket(zmq.PUB)
+        self.publisher.setsockopt(zmq.LINGER, 0)
         self.publisher.bind('tcp://*:%i' % port)
 
     def bind_watcher(self, s):
         self.watcher = self.context.socket(zmq.REP)
+        self.watcher.setsockopt(zmq.LINGER, 0)
         self.watcher.bind('tcp://*:%i' % s)
 
     def sync_send(self, message):
@@ -34,35 +36,37 @@ class Port(Qber):
         self.monitor.debug('sending %s' % message)
         self.send(self.publisher, message)
 
+    def close(self):
+        self.monitor.debug('closing publisher, watcher')
+        self.context.destroy()
+        # sleep(0.1)
+        # self.context.term()
 
-class RadioPort(Port):
+
+class ControllerRadioPort(ControllerPort):
     def __init__(self, monitor):
-        Port.__init__(self, monitor, 5563, 5564)
+        ControllerPort.__init__(self, monitor, 5563, 5564)
         self.poller = zmq.Poller()
         self.poller.register(self.watcher, zmq.POLLIN)
-        # self.running = True
 
-    def run(self, count):
+    def sync(self, count):
         self.monitor.debug('radio controller about to sync with %i clients' % count)
         for i in range(count):
             self.sync_recv()  # wait for micro
             self.sync_send('')  # reply
             self.monitor.debug('radio controller synced with client %i' % i)
-        # while self.running:
-        while True:
-            # self.monitor.debug('checking for radio to resend')
-            if self.poller.poll(10):
-                self.monitor.debug('incoming radio message' )
-                incoming = self.sync_recv()
-                self.monitor.debug('incoming radio message %s' % incoming)
-                self.sync_send('')
-                self.publish(incoming)
+
+    def poll(self, timeout):
+        return self.poller.poll(timeout)
+
+    def close(self):
+        self.poller.unregister(self.watcher)
+        ControllerPort.close(self)
 
 
-
-class MicrobitPort(Port):
+class MicrobitPort(ControllerPort):
     def __init__(self, monitor):
-        Port.__init__(self, monitor, 5561, 5562)
+        ControllerPort.__init__(self, monitor, 5561, 5562)
         self.processes = []
         self.outputs = []
 
@@ -80,7 +84,6 @@ class MicrobitPort(Port):
             sys.exit(-1)
         except TimeoutError:
             self.monitor.error('Timed out waiting for event')
-            self.close()
             sys.exit(-2)
 
     def start_microbits(self, targets):
@@ -98,5 +101,6 @@ class MicrobitPort(Port):
         for process in self.processes:
             if not process.poll():
                 process.terminate()
-            self.outputs += [process.communicate()[0].decode('utf8')]
+                self.outputs += [process.communicate()[0].decode('utf8')]
         self.monitor.debug('outputs: %s' % self.outputs)
+        ControllerPort.close(self)

@@ -33,7 +33,10 @@ class HarnessPort(Qber):
         msg = event_message(e_type, message, self.id)
         self.monitor.debug('sending %s' % msg)
         self.sync_send(msg)
-        return self.sync_recv()
+        self.monitor.debug('waiting for sync')
+        result = self.sync_recv()
+        self.monitor.debug('got sync')
+        return result
 
     def subscribe(self, port):
         self.subsock = self.context.socket(zmq.SUB)
@@ -47,6 +50,10 @@ class HarnessPort(Qber):
 
     def poll(self):
         return self.subsock.poll()
+
+    def close(self):
+        self.syncclient.close()
+        self.subsock.close()
 
 
 class CommandPort(HarnessPort):
@@ -82,6 +89,7 @@ class RadioPort(HarnessPort):
                 command = self.messages_out.get()
                 self.monitor.debug('radio sending command %s' % str(command))
                 self.send_message('radio', command)
+                self.monitor.debug('radio sent command %s' % str(command))
             sleep(0.01)
 
     def next_message(self):
@@ -93,6 +101,10 @@ class RadioPort(HarnessPort):
     def send_radio_message(self, message):
         self.monitor.debug('sending radio message')
         self.messages_out.put(message)
+
+    def close(self):
+        self.poller.unregister(self.subsock)
+        HarnessPort.close(self)
 
 
 

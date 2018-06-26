@@ -71,10 +71,9 @@ class RadioPort(HarnessPort):
         HarnessPort.__init__(self, monitor)
         self.messages_in = Queue()
         self.messages_out = Queue()
-        # TODO: remove this when code smell sorted out (when run moved to RadioHarness)
-        self.id = id
 
     def run(self):
+        self.id = self.monitor.target.id
         self.monitor.debug('radio port running')
         self.open(5563, 5564)
         self.monitor.debug('radio port open')
@@ -84,7 +83,8 @@ class RadioPort(HarnessPort):
             if self.poller.poll(10):
                 command = self.receive_command()
                 self.monitor.debug('radio got command %s' % str(command))
-                self.messages_in.put(command)
+                if command.id != self.id:
+                    self.messages_in.put(command)
             if not self.messages_out.empty():
                 command = self.messages_out.get()
                 self.monitor.debug('radio sending command %s' % str(command))

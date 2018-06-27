@@ -6,6 +6,7 @@
 ## Nice to have
 
 1. Don't look for radio messages unless radio is on
+1. Sync uip ta ned rather than just killing the processes?
 
 ## Done
 

@@ -12,6 +12,10 @@ from mpbdd.microbitcontroller import MicrobitController, BUTTON_A, BUTTON_B
 sys.path += '/home/romilly/git/active/bdd-tester/src'
 
 
+def is_display(message, microbit):
+    return is_event('display', message, microbit)
+
+
 class ControllerTest(TestCase):
     def setUp(self):
         self.controller = MicrobitController()
@@ -21,29 +25,27 @@ class ControllerTest(TestCase):
                             ,Target('tests/e2e/quizmaster.py','Team 1')
                             ,Target('tests/e2e/quizmaster.py','Team 2'))
         self.controller.press(BUTTON_A, 'QuizRunner')
-        event = self.controller.read_event()
-        assert_that(event, is_event('display', 'runner','QuizRunner'))
-        self.expect_events(is_event('display', 'checking in','Team 1'),is_event('display', 'checking in','Team 2'))
+        runner = 'runner'
+        quiz_runner = 'QuizRunner'
+        self.check_display(quiz_runner, runner)
+        self.expect_events(is_display('checking in','Team 1'),is_display('checking in','Team 2'))
         self.controller.press(BUTTON_B,'Team 1')
-        event = self.controller.read_event()
-        assert_that(event, is_event('display', 'check','Team 1'))
-        event = self.controller.read_event()
-        assert_that(event, is_event('display', 'team 1 checked in','QuizRunner'))
-        event = self.controller.read_event()
-        assert_that(event, is_event('display', 'team: 1','Team 1'))
+        self.check_display('Team 1', 'check')
+        self.check_display('QuizRunner', 'team 1 checked in')
+        self.check_display('Team 1', 'team: 1')
         sleep(0.1) # otherwise team 2 might get team 1's message after the button press!
+
         self.controller.press(BUTTON_B,'Team 2')
-        event = self.controller.read_event()
-        assert_that(event, is_event('display', 'check','Team 2'))
-        event = self.controller.read_event()
-        assert_that(event, is_event('display', 'team 2 checked in','QuizRunner'))
+        self.check_display('Team 2', 'check')
+        self.check_display('QuizRunner', 'team 2 checked in')
         self.controller.press(BUTTON_B,'QuizRunner')
-        event = self.controller.read_event()
-        assert_that(event, is_event('display', 'all checked in','QuizRunner'))
+        self.check_display('QuizRunner', 'all checked in')
         sleep(1.0) # as there will be more radio messages to process
+        ##
 
-
-
+    def check_display(self, microbit, message):
+        event = self.controller.read_event()
+        assert_that(event, is_display(message, microbit))
 
     def tearDown(self):
         self.controller.close()

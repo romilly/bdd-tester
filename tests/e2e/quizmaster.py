@@ -30,8 +30,6 @@ def wait_for_role():
             say(RUNNER)
             return RUNNER
         message = radio.receive()
-        if message:
-            print(message)
         if message == CHECK_IN:
             print(TEAM)
             return TEAM

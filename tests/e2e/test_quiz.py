@@ -37,6 +37,12 @@ class ControllerTest(TestCase):
         assert_that(event, is_event('display', 'check','Team 2'))
         event = self.controller.read_event()
         assert_that(event, is_event('display', 'team 2 checked in','QuizRunner'))
+        self.controller.press(BUTTON_B,'QuizRunner')
+        event = self.controller.read_event()
+        assert_that(event, is_event('display', 'all checked in','QuizRunner'))
+        sleep(1.0) # as there will be more radio messages to process
+
+
 
 
     def tearDown(self):

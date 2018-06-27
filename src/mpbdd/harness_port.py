@@ -33,9 +33,9 @@ class HarnessPort(Qber):
         msg = event_message(e_type, message, self.id)
         self.monitor.debug('sending %s' % msg)
         self.sync_send(msg)
-        self.monitor.debug('waiting for sync')
+        # self.monitor.debug('waiting for sync')
         result = self.sync_recv()
-        self.monitor.debug('got sync')
+        # self.monitor.debug('got sync')
         return result
 
     def subscribe(self, port):
@@ -74,32 +74,34 @@ class RadioPort(HarnessPort):
 
     def run(self):
         self.id = self.monitor.target.id
-        self.monitor.debug('radio port running')
+        # self.monitor.debug('radio port running')
         self.open(5563, 5564)
-        self.monitor.debug('radio port open')
+        # self.monitor.debug('radio port open')
         self.poller = zmq.Poller()
         self.poller.register(self.subsock, zmq.POLLIN)
         while True:
             if self.poller.poll(10):
                 command = self.receive_command()
-                self.monitor.debug('radio got command %s' % str(command))
+                # self.monitor.debug('radio got command %s' % str(command))
                 if command.id != self.id:
                     self.messages_in.put(command)
             if not self.messages_out.empty():
                 command = self.messages_out.get()
-                self.monitor.debug('radio sending command %s' % str(command))
+                # self.monitor.debug('radio sending command %s' % str(command))
                 self.send_message('radio', command)
-                self.monitor.debug('radio sent command %s' % str(command))
+                # self.monitor.debug('radio sent command %s' % str(command))
             sleep(0.01)
 
     def next_message(self):
-        self.monitor.debug('looking for radio message')
+        # self.monitor.debug('looking for radio message')
         if self.messages_in.empty():
             return None
-        return self.messages_in.get()
+        incoming = self.messages_in.get()
+        self.monitor.debug('getting %s from radio queue' % str(incoming))
+        return incoming.message
 
     def send_radio_message(self, message):
-        self.monitor.debug('sending radio message')
+        # self.monitor.debug('sending radio message')
         self.messages_out.put(message)
 
     def close(self):

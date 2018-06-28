@@ -28,7 +28,7 @@ class ControllerTest(TestCase):
                             ,Target('tests/e2e/quizmaster.py','Team 2'))
         self.controller.press(BUTTON_A, QUIZ_RUNNER)
         self.check_display(QUIZ_RUNNER, 'runner')
-        self.expect_events(is_display('checking in','Team 1'),is_display('checking in','Team 2'))
+        self.expect_events(is_display('checking in', 'Team 1'), is_display('checking in', 'Team 2'))
         self.controller.press(BUTTON_B,'Team 1')
         self.check_display('Team 1', 'check')
         self.check_display(QUIZ_RUNNER, 'team 1 checked in')
@@ -45,8 +45,8 @@ class ControllerTest(TestCase):
         ## play a round
         self.expect_events(
             is_display('round 1', QUIZ_RUNNER),
-            is_display('starting quiz', 'Team 1'),
-            is_display('starting quiz', 'Team 2'))
+            is_display('round 1', 'Team 1'),
+            is_display('round 1', 'Team 2'))
         # self.controller.press()
 
     def check_display(self, microbit, message):

@@ -45,7 +45,7 @@ class HandlerTest(TestCase):
     def test_button_handler_handles_button_events(self):
         handler = ButtonHandler(self.harness)
         handler.command(Event(BUTTON_A, DOWN, DONT_CARE))
-        assert_that(self.harness.event, is_event(BUTTON_A, DOWN, DONT_CARE))
+        assert_that(self.harness.event, is_event(DONT_CARE, BUTTON_A, DOWN))
 
     def test_handlers_chain_correctly(self):
         handler = Terminator(self.harness, FilteringHandler(self.harness, ButtonHandler(self.harness)))
@@ -53,7 +53,7 @@ class HandlerTest(TestCase):
         self.assertTrue(self.harness.terminated)
         self.assertTrue(handler.command(Event(DONT_CARE, DONT_CARE, 'not one')))
         handler.command(Event(BUTTON_A, DOWN, 'one'))
-        assert_that(self.harness.event, is_event(BUTTON_A, DOWN, 'one'))
+        assert_that(self.harness.event, is_event('one', BUTTON_A, DOWN))
 
 
 

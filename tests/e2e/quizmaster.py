@@ -149,12 +149,13 @@ def are_we_finished():
 
 
 def play_the_quiz(team):
-    display.scroll('starting quiz')
+    # display.scroll('starting quiz')
+    global round
     while True:
         result =  are_we_finished()
         if result is not None:
             return result
-        display.scroll('playing round')
+        display.scroll('round %d' % round)
         play_a_round(team)
 
 

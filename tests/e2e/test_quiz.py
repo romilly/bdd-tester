@@ -51,6 +51,12 @@ class ControllerTest(TestCase):
         self.expect_events(
             is_display('team 1 buzzing', QUIZ_RUNNER),
             is_display('team 1 buzzing', 'Team 1'))
+        self.controller.press(BUTTON_B, QUIZ_RUNNER)
+        self.controller.press(BUTTON_A, 'Team 2')
+        self.expect_events(
+            is_display('team 2 buzzing', QUIZ_RUNNER),
+            is_display('team 2 buzzing', 'Team 2'))
+
 
 
 

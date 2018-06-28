@@ -41,6 +41,7 @@ def wait_for_checkins():
     while True:
         if button_b.is_pressed():
             say(ALL_IN)
+            radio.send(ALL_IN)
             return
         message = radio.receive()
         if message == CHECKING_IN:
@@ -148,12 +149,12 @@ def are_we_finished():
 
 
 def play_the_quiz(team):
-    display.show('starting quiz')
+    display.scroll('starting quiz')
     while True:
         result =  are_we_finished()
         if result is not None:
             return result
-        display.show('playing round')
+        display.scroll('playing round')
         play_a_round(team)
 
 
@@ -187,7 +188,7 @@ def wait_for_start():
 def do_team_player_things():
     my_team = check_in()
     wait_for_start()
-    say('team %d' % my_team)
+    # say('team %d' % my_team)
     play_the_quiz(my_team)
 
 

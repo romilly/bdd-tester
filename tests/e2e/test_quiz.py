@@ -47,7 +47,12 @@ class ControllerTest(TestCase):
             is_display('round 1', QUIZ_RUNNER),
             is_display('round 1', 'Team 1'),
             is_display('round 1', 'Team 2'))
-        # self.controller.press()
+        self.controller.press(BUTTON_A, 'Team 1')
+        self.expect_events(
+            is_display('team 1 buzzing', QUIZ_RUNNER),
+            is_display('team 1 buzzing', 'Team 1'))
+
+
 
     def check_display(self, microbit, message):
         event = self.controller.read_event()

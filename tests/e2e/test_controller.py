@@ -26,8 +26,7 @@ class ControllerTest(TestCase):
         assert_that(event, is_display('microbit 1','That hurt!'))
 
     def test_digital_inputs(self):
-        self.controller.run(Target('tests/e2e/digital_read.py'))
-        print('controller has started microbit')
+        self.controller.run(Target('tests/e2e/digital_read.py','microbit 1'))
         self.controller.set_digital_input('microbit 1', 8)
         event = self.controller.read_event()
         assert_that(event, is_display('microbit 1','Ouch!'))

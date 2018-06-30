@@ -104,8 +104,6 @@ def run_the_quiz():
     while True:
         quit_if_game_over()
         run_a_round()
-        end_round()
-        sleep(1000)
 
 
 def check_in():

@@ -4,7 +4,7 @@ import threading
 
 from time import sleep
 
-from mpbdd.helpers import event_message, DEFAULT_NAME
+from mpbdd.helpers import event_message, DEFAULT_NAME, describe_command
 from mpbdd.microbit_port import MicrobitPort, ControllerRadioPort
 from mpbdd.monitors import LoggingMonitor
 
@@ -25,7 +25,6 @@ class RadioController():
         self.radio_port.sync(count)
         sync_event.set()
         while self.running:
-            # self.monitor.debug('checking for radio to resend')
             if self.poll(10):
                 incoming = self.radio_recv()
                 self.sync_send('')
@@ -71,7 +70,7 @@ class MicrobitController():
         self.port.close()
         self.monitor.info('finished')
 
-    def press(self, target, button, duration_ms=200):
+    def press(self, target, button, duration_ms=150):
         self._publish_command(target, button, DOWN)
         sleep(duration_ms/1000.0)
         self._publish_command(target, button, UP)

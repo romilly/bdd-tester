@@ -19,7 +19,7 @@ def describe_command(e):
 
 # TODO remove default
 class Target():
-    def __init__(self, script, id=DEFAULT_NAME):
+    def __init__(self, script, id):
         self.script = script
         self.id = id
 

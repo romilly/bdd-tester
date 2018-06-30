@@ -13,6 +13,9 @@ UP = 'up'
 BUTTON_A = 'button_a'
 BUTTON_B = 'button_b'
 
+ON = 1
+OFF = 0
+
 
 class RadioController():
     def __init__(self, monitor):
@@ -83,4 +86,9 @@ class MicrobitController():
 
     def set_digital_input(self, target, number, state=1):
         self._publish_command(target, number, str(state))
+
+    def press_extra(self, target, pin_number, duration_ms=150):
+        self.set_digital_input(target, pin_number, ON)
+        sleep(duration_ms/1000.0)
+        self.set_digital_input(target, pin_number, OFF)
 

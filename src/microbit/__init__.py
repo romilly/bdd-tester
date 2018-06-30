@@ -86,16 +86,11 @@ class Button:
         self.name = name
 
     def _set_pressed(self, b):
-        monitor.debug('setting button %s to be %s' % (self.name, str(b)))
         self._pressed = b
         if b:
             self._count += 1
 
     def is_pressed(self) -> bool:
-        """returns True or False to indicate if the button is pressed at the time of
-        the method call.
-        """
-        # logging.debug('is_pressed invoked')
         return self._pressed
 
     def state(self):
@@ -105,9 +100,6 @@ class Button:
         return 'Button %s - %s' % (self.name, self.state())
 
     def was_pressed(self) -> bool:
-        """ returns True or False to indicate if the button was pressed since the device
-        started or the last time this method was called.
-        """
         result = self._pressed
         self._pressed = False
         return result

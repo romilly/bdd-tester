@@ -2,7 +2,7 @@ import sys
 from unittest import TestCase
 from hamcrest import assert_that
 
-from helpers import is_event, is_display
+from helpers import is_display
 from mpbdd.helpers import Target
 from mpbdd.microbitcontroller import MicrobitController, BUTTON_A, BUTTON_B
 

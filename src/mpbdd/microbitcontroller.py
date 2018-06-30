@@ -27,9 +27,7 @@ class RadioController():
         while self.running:
             # self.monitor.debug('checking for radio to resend')
             if self.poll(10):
-                # self.monitor.debug('incoming radio message' )
                 incoming = self.radio_recv()
-                self.monitor.debug('incoming radio message %s' % incoming)
                 self.sync_send('')
                 self.publish(incoming)
         self.monitor.debug('closing radio port')

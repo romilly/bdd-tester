@@ -1,5 +1,6 @@
 from abc import ABCMeta, abstractmethod
 
+from mpbdd.helpers import describe_command
 from mpbdd.microbitcontroller import BUTTON_A, BUTTON_B, DOWN
 
 
@@ -27,7 +28,7 @@ class CommandHandler(metaclass=ABCMeta):
 
 class DigitalPinHandler(CommandHandler):
     def handle_command(self, event):
-        self.monitor.debug('checking for pin event %s' % str(event))
+        # self.monitor.debug('checking for pin event %s' % str(event))
         if event.e_type in range(1,17):
             self._harness.read_digital_event(event)
             return True
@@ -38,11 +39,13 @@ class DigitalPinHandler(CommandHandler):
 class FilteringHandler(CommandHandler):
     def handle_command(self, event):
         remove = event.id != self._harness.id
-        if remove:
-            self.monitor.debug('filter filtering out %s' % str(event))
-        else:
-            self.monitor.debug('filter passing on %s'  % str(event))
         return remove
+
+
+class LoggingHandler(CommandHandler):
+    def handle_command(self, event):
+        self.monitor.debug('got %s' % describe_command(event))
+        return False
 
 
 class Terminator(CommandHandler):
@@ -56,7 +59,6 @@ class Terminator(CommandHandler):
 
 class ButtonHandler(CommandHandler):
     def handle_command(self, event):
-        self.monitor.debug('checking button event')
         if event.e_type in [BUTTON_A, BUTTON_B]:
             self._harness.button_event(event)
             return True

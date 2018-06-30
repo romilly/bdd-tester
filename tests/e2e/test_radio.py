@@ -3,7 +3,7 @@ from unittest import TestCase
 
 from hamcrest import assert_that, none, not_none
 
-from helpers import is_event
+from helpers import is_event, is_display
 from mpbdd.helpers import Target
 from mpbdd.microbitcontroller import MicrobitController, BUTTON_A
 
@@ -21,7 +21,7 @@ class ControllerTest(TestCase):
         self.controller.run(Target('tests/e2e/button_radio.py'),Target('tests/e2e/button_radio.py','microbit 2'))
         self.controller.press(BUTTON_A)
         event = self.controller.read_event()
-        assert_that(event, is_event('microbit 2', 'display', 'signal received!'))
+        assert_that(event, is_display('microbit 2', 'signal received!'))
 
     def test_filter_own_own_transmissions(self):
         self.controller.run(Target('tests/e2e/button_radio.py'), Target('tests/e2e/button_radio.py', 'microbit 2'))

@@ -3,7 +3,8 @@ import threading
 
 import zmq
 
-from mpbdd.handlers import Terminator, FilteringHandler, ButtonHandler, MissingHandlerException, DigitalPinHandler
+from mpbdd.handlers import Terminator, FilteringHandler, ButtonHandler, MissingHandlerException, DigitalPinHandler, \
+    LoggingHandler
 from mpbdd.harness_port import CommandPort, RadioPort
 from mpbdd.helpers import event_message, event
 from mpbdd.microbitcontroller import DOWN
@@ -25,16 +26,17 @@ class Harness():
         radio_thread = threading.Thread(target=self.radio_port.run, daemon=True)
         radio_thread.start()
         self._callbacks = {}
-        self.monitor.info('Harness created')
-        self.handler_chain = Terminator(self, FilteringHandler(self, ButtonHandler(self, DigitalPinHandler(self))))
+        self.handler_chain = Terminator(self,
+                            FilteringHandler(self,
+                            LoggingHandler(self,
+                            ButtonHandler(self,
+                            DigitalPinHandler(self)))))
 
     def add_callback(self, key, object):
         self._callbacks[key] = object
 
     def run(self):
-        self.monitor.debug('Harness running')
         while True:
-            self.monitor.debug('checking for message')
             if self.incoming():
                 command = self.receive_command()
                 if not self.handler_chain.command(command):

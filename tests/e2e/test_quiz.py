@@ -5,17 +5,13 @@ from time import sleep
 from unittest import TestCase
 from hamcrest import assert_that
 
-from helpers import is_event
+from helpers import is_event, is_display
 from mpbdd.helpers import Target
 from mpbdd.microbitcontroller import MicrobitController, BUTTON_A, BUTTON_B
 
 QUIZ_RUNNER = 'QuizRunner'
 
 sys.path += '/home/romilly/git/active/bdd-tester/src'
-
-
-def is_display(message, microbit):
-    return is_event('display', message, microbit)
 
 
 class ControllerTest(TestCase):
@@ -28,7 +24,7 @@ class ControllerTest(TestCase):
                             ,Target('tests/e2e/quizmaster.py','Team 2'))
         self.controller.press(BUTTON_A, QUIZ_RUNNER)
         self.check_display(QUIZ_RUNNER, 'runner')
-        self.expect_events(is_display('checking in', 'Team 1'), is_display('checking in', 'Team 2'))
+        self.expect_events(is_display('Team 1', 'checking in'), is_display('Team 2', 'checking in'))
         self.controller.press(BUTTON_B,'Team 1')
         self.check_display('Team 1', 'check')
         self.check_display(QUIZ_RUNNER, 'team 1 checked in')
@@ -39,30 +35,40 @@ class ControllerTest(TestCase):
         self.check_display('Team 2', 'check')
         self.check_display(QUIZ_RUNNER, 'team 2 checked in')
         self.controller.press(BUTTON_B, QUIZ_RUNNER)
-        self.expect_events(is_display('team: 2', 'Team 2'), is_display('all checked in', QUIZ_RUNNER))
+        self.expect_events(is_display('Team 2', 'team: 2'), is_display(QUIZ_RUNNER, 'all checked in'))
         sleep(1.0) # as there will be more radio messages to process
         self.check_display(QUIZ_RUNNER, 'Play time!')
         ## play a round
         self.expect_events(
-            is_display('round 1', QUIZ_RUNNER),
-            is_display('round 1', 'Team 1'),
-            is_display('round 1', 'Team 2'))
+            is_display(QUIZ_RUNNER, 'round 1'),
+            is_display('Team 1', 'round 1'),
+            is_display('Team 2', 'round 1'))
         self.controller.press(BUTTON_A, 'Team 1')
         self.expect_events(
-            is_display('team 1 buzzing', QUIZ_RUNNER),
-            is_display('team 1 buzzing', 'Team 1'))
+            is_display(QUIZ_RUNNER, 'team 1 buzzing'),
+            is_display('Team 1', 'team 1 buzzing'))
         self.controller.press(BUTTON_B, QUIZ_RUNNER)
         self.controller.press(BUTTON_A, 'Team 2')
         self.expect_events(
-            is_display('team 2 buzzing', QUIZ_RUNNER),
-            is_display('team 2 buzzing', 'Team 2'))
+            is_display(QUIZ_RUNNER, 'team 2 buzzing'),
+            is_display('Team 2', 'team 2 buzzing'))
+        self.controller.press(BUTTON_A, QUIZ_RUNNER)
+        self.expect_events(
+            is_display(QUIZ_RUNNER, 'round over'),
+            is_display('Team 1', 'round over'),
+            is_display('Team 2', 'round over'))
+        self.expect_events(
+            is_display(QUIZ_RUNNER,'round 2'),
+            is_display('Team 1', 'round 2'),
+            is_display('Team 2', 'round 2'))
+
 
 
 
 
     def check_display(self, microbit, message):
         event = self.controller.read_event()
-        assert_that(event, is_display(message, microbit))
+        assert_that(event, is_display(microbit, message))
 
     def tearDown(self):
         self.controller.close()
@@ -71,7 +77,7 @@ class ControllerTest(TestCase):
         start = time.perf_counter()
         event_set = set(event_matchers)
         while len(event_set):
-            if time.perf_counter() - start > 1000.0 * timeout_ms:
+            if time.perf_counter() - start > timeout_ms / 1000.0:
                 raise TimeoutError()
             next_event = self.controller.read_event()
             if next_event:

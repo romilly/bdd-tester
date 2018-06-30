@@ -84,10 +84,10 @@ def run_a_round():
     say('round %d' % round)
     radio.send('round')
     wait_for_end()
-    round_over()
+    end_round()
 
 
-def round_over():
+def end_round():
     global round
     round = round + 1
     radio.send(ROUND_OVER)
@@ -104,7 +104,8 @@ def run_the_quiz():
     while True:
         quit_if_game_over()
         run_a_round()
-        round_over()
+        end_round()
+        sleep(1000)
 
 
 def check_in():
@@ -127,13 +128,21 @@ def check_in():
 
 def play_a_round(team):
     while True:
-        message = radio.receive()
-        if message == ROUND_OVER:
-            say(ROUND_OVER)
+        if round_is_over():
             return
         if button_a.is_pressed():
             radio.send('%s %d buzzing' % (TEAM, team))
             say('team %d buzzing' % team)
+            break
+    while not round_is_over():
+        pass
+
+
+def round_is_over():
+        message = radio.receive()
+        if message == ROUND_OVER:
+            say(ROUND_OVER)
+            return True
 
 
 def are_we_finished():
@@ -157,6 +166,7 @@ def play_the_quiz(team):
             return result
         display.scroll('round %d' % round)
         play_a_round(team)
+        round += 1
 
 
 def goodbye():

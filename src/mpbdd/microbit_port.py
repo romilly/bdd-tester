@@ -33,7 +33,6 @@ class ControllerPort(Qber):
         return self.recv(self.watcher)
 
     def publish(self, message):
-        self.monitor.debug('sending %s' % message)
         self.send(self.publisher, message)
 
     def close(self):
@@ -48,11 +47,9 @@ class ControllerRadioPort(ControllerPort):
         self.poller.register(self.watcher, zmq.POLLIN)
 
     def sync(self, count):
-        self.monitor.debug('radio controller about to sync with %i clients' % count)
         for i in range(count):
             self.sync_recv()  # wait for micro
             self.sync_send('')  # reply
-            self.monitor.debug('radio controller synced with client %i' % i)
 
     def poll(self, timeout):
         return self.poller.poll(timeout)
@@ -75,7 +72,6 @@ class MicrobitPort(ControllerPort):
         try:
             if self.watcher.poll(timeout=timeout):
                 incoming = self.sync_recv()
-                self.monitor.debug('sees incoming event %s' % incoming)
                 self.sync_send('')
                 return event(incoming)
         except KeyboardInterrupt:
@@ -95,6 +91,7 @@ class MicrobitPort(ControllerPort):
             self.sync_send(target.id)  # tell it its id
             self.monitor.debug("added %s" % target.id)
 
+    # TODO: use join rather than terminate
     def close(self):
         for process in self.processes:
             if not process.poll():

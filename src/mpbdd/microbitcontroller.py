@@ -71,7 +71,7 @@ class MicrobitController():
         self.port.close()
         self.monitor.info('finished')
 
-    def press(self, button, target=DEFAULT_NAME, duration_ms=200):
+    def press(self, target, button, duration_ms=200):
         self._publish_command(button, DOWN, target)
         sleep(duration_ms/1000.0)
         self._publish_command(button, UP, target)

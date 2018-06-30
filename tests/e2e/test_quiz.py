@@ -22,19 +22,19 @@ class ControllerTest(TestCase):
         self.controller.run(Target('tests/e2e/quizmaster.py', QUIZ_RUNNER)
                             ,Target('tests/e2e/quizmaster.py','Team 1')
                             ,Target('tests/e2e/quizmaster.py','Team 2'))
-        self.controller.press(BUTTON_A, QUIZ_RUNNER)
+        self.controller.press(QUIZ_RUNNER, BUTTON_A)
         self.check_display(QUIZ_RUNNER, 'runner')
         self.expect_events(is_display('Team 1', 'checking in'), is_display('Team 2', 'checking in'))
-        self.controller.press(BUTTON_B,'Team 1')
+        self.controller.press('Team 1', BUTTON_B)
         self.check_display('Team 1', 'check')
         self.check_display(QUIZ_RUNNER, 'team 1 checked in')
         self.check_display('Team 1', 'team: 1')
         sleep(0.1) # otherwise team 2 might get team 1's message after the button press!
 
-        self.controller.press(BUTTON_B,'Team 2')
+        self.controller.press('Team 2', BUTTON_B)
         self.check_display('Team 2', 'check')
         self.check_display(QUIZ_RUNNER, 'team 2 checked in')
-        self.controller.press(BUTTON_B, QUIZ_RUNNER)
+        self.controller.press(QUIZ_RUNNER, BUTTON_B)
         self.expect_events(is_display('Team 2', 'team: 2'), is_display(QUIZ_RUNNER, 'all checked in'))
         sleep(1.0) # as there will be more radio messages to process
         self.check_display(QUIZ_RUNNER, 'Play time!')
@@ -43,16 +43,16 @@ class ControllerTest(TestCase):
             is_display(QUIZ_RUNNER, 'round 1'),
             is_display('Team 1', 'round 1'),
             is_display('Team 2', 'round 1'))
-        self.controller.press(BUTTON_A, 'Team 1')
+        self.controller.press('Team 1', BUTTON_A)
         self.expect_events(
             is_display(QUIZ_RUNNER, 'team 1 buzzing'),
             is_display('Team 1', 'team 1 buzzing'))
-        self.controller.press(BUTTON_B, QUIZ_RUNNER)
-        self.controller.press(BUTTON_A, 'Team 2')
+        self.controller.press(QUIZ_RUNNER, BUTTON_B)
+        self.controller.press('Team 2', BUTTON_A)
         self.expect_events(
             is_display(QUIZ_RUNNER, 'team 2 buzzing'),
             is_display('Team 2', 'team 2 buzzing'))
-        self.controller.press(BUTTON_A, QUIZ_RUNNER)
+        self.controller.press(QUIZ_RUNNER, BUTTON_A)
         self.expect_events(
             is_display(QUIZ_RUNNER, 'round over'),
             is_display('Team 1', 'round over'),

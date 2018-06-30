@@ -14,25 +14,25 @@ class ControllerTest(TestCase):
         self.controller = MicrobitController()
 
     def test_button_and_display(self):
-        self.controller.run(Target('tests/e2e/button_print.py'),Target('tests/e2e/button_print.py','microbit 2'))
-        self.controller.press(BUTTON_A)
+        self.controller.run(Target('tests/e2e/button_print.py','microbit 1'),Target('tests/e2e/button_print.py','microbit 2'))
+        self.controller.press('microbit 1', BUTTON_A)
         event = self.controller.read_event()
         assert_that(event, is_display('microbit 1','Ouch!'))
-        self.controller.press(BUTTON_A, 'microbit 2')
+        self.controller.press('microbit 2', BUTTON_A)
         event = self.controller.read_event()
         assert_that(event, is_display('microbit 2', 'Ouch!'))
-        self.controller.press(BUTTON_B)
+        self.controller.press('microbit 1', BUTTON_B)
         event = self.controller.read_event()
         assert_that(event, is_display('microbit 1','That hurt!'))
 
     def test_digital_inputs(self):
         self.controller.run(Target('tests/e2e/digital_read.py'))
         print('controller has started microbit')
-        self.controller.set_digital_input(8)
+        self.controller.set_digital_input(8, 'microbit 1')
         event = self.controller.read_event()
         assert_that(event, is_display('microbit 1','Ouch!'))
-        self.controller.set_digital_input(8, 0)
-        self.controller.set_digital_input(16)
+        self.controller.set_digital_input(8, 0, 'microbit 1')
+        self.controller.set_digital_input(16, 'microbit 1')
         event = self.controller.read_event()
         assert_that(event, is_display('microbit 1','That hurt!'))
 

@@ -65,23 +65,23 @@ class MicrobitController():
         sync_event.wait()
 
     def close(self):
-        self._publish_command('END', '*')
+        self._publish_command('*', 'END')
         self.radio_controller.close()
         self.radio_thread.join()
         self.port.close()
         self.monitor.info('finished')
 
     def press(self, target, button, duration_ms=200):
-        self._publish_command(button, DOWN, target)
+        self._publish_command(target, button, DOWN)
         sleep(duration_ms/1000.0)
-        self._publish_command(button, UP, target)
+        self._publish_command(target, button, UP)
 
-    def _publish_command(self, command, value='', target=DEFAULT_NAME):
+    def _publish_command(self, target, command, value=''):
         self.port.publish(event_message(command, value, target))
 
     def read_event(self):
         return self.port.read_event()
 
     def set_digital_input(self, number, state=1, target=DEFAULT_NAME):
-        self._publish_command(number, state, target)
+        self._publish_command(target, number, state)
 

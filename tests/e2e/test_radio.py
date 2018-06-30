@@ -18,13 +18,15 @@ class ControllerTest(TestCase):
 
     def test_button_and_display(self):
         # adjust these to reflect the relative or absolute path to the script to run on the microbit
-        self.controller.run(Target('tests/e2e/button_radio.py', 'microbit 1'),Target('tests/e2e/button_radio.py','microbit 2'))
+        self.controller.run(Target('microbit 1', 'tests/e2e/button_radio.py'),
+                            Target('microbit 2', 'tests/e2e/button_radio.py'))
         self.controller.press('microbit 1', BUTTON_A)
         event = self.controller.read_event()
         assert_that(event, see('microbit 2', 'signal received!'))
 
     def test_filter_own_own_transmissions(self):
-        self.controller.run(Target('tests/e2e/button_radio.py','microbit 1'), Target('tests/e2e/button_radio.py', 'microbit 2'))
+        self.controller.run(Target('microbit 1', 'tests/e2e/button_radio.py'),
+                            Target('microbit 2', 'tests/e2e/button_radio.py'))
         self.controller.press('microbit 1', BUTTON_A)
         event = self.controller.read_event() # checked in test above
         assert_that(event, not_none())

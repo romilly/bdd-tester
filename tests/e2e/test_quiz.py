@@ -1,9 +1,8 @@
 import sys
-import time
 
 from time import sleep
-from unittest import TestCase
 
+from controller_test import AbstractControllerTest
 from helpers import see
 from mpbdd.helpers import Target
 from mpbdd.microbitcontroller import MicrobitController, BUTTON_A, BUTTON_B
@@ -19,14 +18,11 @@ BUTTON_D = 16
 sys.path += '/home/romilly/git/active/bdd-tester/src'
 
 
-class ControllerTest(TestCase):
-    def setUp(self):
-        self.controller = MicrobitController()
-
+class QuizTest(AbstractControllerTest):
     def test_button_and_display(self):
-        self.controller.run(Target('tests/e2e/quizmaster.py', QUIZ_RUNNER)
-                            , Target('tests/e2e/quizmaster.py', TEAM1)
-                            , Target('tests/e2e/quizmaster.py', TEAM2))
+        self.controller.run(Target(QUIZ_RUNNER, 'tests/e2e/quizmaster.py'),
+                            Target(TEAM1, 'tests/e2e/quizmaster.py'),
+                            Target(TEAM2, 'tests/e2e/quizmaster.py'))
         self.controller.press(QUIZ_RUNNER, BUTTON_A)
         self.expect(see(QUIZ_RUNNER, 'runner'))
         self.expect(see(TEAM1, 'checking in'),
@@ -36,7 +32,6 @@ class ControllerTest(TestCase):
         self.expect(see(QUIZ_RUNNER, 'team 1 checked in'))
         self.expect(see(TEAM1, 'team: 1'))
         sleep(0.1) # otherwise team 2 might get team 1's message after the button press!
-
         self.controller.press(TEAM2, BUTTON_B)
         self.expect(see(TEAM2, 'check'))
         self.expect(see(QUIZ_RUNNER, 'team 2 checked in'))
@@ -87,24 +82,3 @@ class ControllerTest(TestCase):
         sleep(1.0) # allow radio stuff  to clear
 
 
-    def tearDown(self):
-        self.controller.close()
-
-    def expect(self, *event_matchers, timeout_ms=100):
-        start = time.perf_counter()
-        event_set = set(event_matchers)
-        while len(event_set):
-            if time.perf_counter() - start > timeout_ms / 1000.0:
-                raise TimeoutError()
-            next_event = self.controller.read_event()
-            if next_event:
-                if self.event_is_ok(event_set, next_event):
-                    continue
-                self.fail('unexpected event %s' % str(next_event))
-
-    def event_is_ok(self, event_set, next_event):
-        for possible in event_set:
-            if possible.matches(next_event):
-                event_set.remove(possible)
-                return True
-        return False

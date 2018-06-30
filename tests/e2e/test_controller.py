@@ -14,7 +14,8 @@ class ControllerTest(TestCase):
         self.controller = MicrobitController()
 
     def test_button_and_display(self):
-        self.controller.run(Target('tests/e2e/button_print.py','microbit 1'),Target('tests/e2e/button_print.py','microbit 2'))
+        self.controller.run(Target('microbit 1', 'tests/e2e/button_print.py'),
+                            Target('microbit 2', 'tests/e2e/button_print.py'))
         self.controller.press('microbit 1', BUTTON_A)
         event = self.controller.read_event()
         assert_that(event, see('microbit 1', 'Ouch!'))
@@ -26,7 +27,7 @@ class ControllerTest(TestCase):
         assert_that(event, see('microbit 1', 'That hurt!'))
 
     def test_digital_inputs(self):
-        self.controller.run(Target('tests/e2e/digital_read.py','microbit 1'))
+        self.controller.run(Target('microbit 1', 'tests/e2e/digital_read.py'))
         self.controller.set_digital_input('microbit 1', 8)
         event = self.controller.read_event()
         assert_that(event, see('microbit 1', 'Ouch!'))

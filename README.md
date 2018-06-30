@@ -62,7 +62,7 @@ from mpbdd.microbitcontroller import MicrobitController, BUTTON_A
 sys.path += '/home/romilly/git/active/bdd-tester/src'
 
 
-class ControllerTest(TestCase):
+class QuizTest(TestCase):
     def setUp(self):
         self.controller = MicrobitController()
 

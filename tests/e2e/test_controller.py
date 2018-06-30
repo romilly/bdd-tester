@@ -28,11 +28,11 @@ class ControllerTest(TestCase):
     def test_digital_inputs(self):
         self.controller.run(Target('tests/e2e/digital_read.py'))
         print('controller has started microbit')
-        self.controller.set_digital_input(8, 'microbit 1')
+        self.controller.set_digital_input('microbit 1', 8)
         event = self.controller.read_event()
         assert_that(event, is_display('microbit 1','Ouch!'))
-        self.controller.set_digital_input(8, 0, 'microbit 1')
-        self.controller.set_digital_input(16, 'microbit 1')
+        self.controller.set_digital_input('microbit 1', 8, 0)
+        self.controller.set_digital_input('microbit 1', 16)
         event = self.controller.read_event()
         assert_that(event, is_display('microbit 1','That hurt!'))
 

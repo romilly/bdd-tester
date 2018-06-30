@@ -82,6 +82,6 @@ class MicrobitController():
     def read_event(self):
         return self.port.read_event()
 
-    def set_digital_input(self, number, state=1, target=DEFAULT_NAME):
-        self._publish_command(target, number, state)
+    def set_digital_input(self, target, number, state=1):
+        self._publish_command(target, number, str(state))
 

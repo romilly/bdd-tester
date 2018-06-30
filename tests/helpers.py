@@ -21,5 +21,5 @@ class EventMatcher(BaseMatcher):
 def is_event(e_type, message='', id=DEFAULT_NAME):
     return EventMatcher(e_type, message, id)
 
-def is_display(microbit, message):
+def see(microbit, message):
     return is_event('display', message, microbit)

@@ -5,7 +5,7 @@ from unittest import TestCase
 from mpbdd.microbitcontroller import MicrobitController
 
 
-class AbstractControllerTest(TestCase, metaclass=ABCMeta):
+class AbstractControllerTest(TestCase):
     def setUp(self):
         self.controller = MicrobitController()
 
@@ -24,9 +24,16 @@ class AbstractControllerTest(TestCase, metaclass=ABCMeta):
                     continue
                 self.fail('unexpected event %s' % str(next_event))
 
+    @classmethod
     def event_is_ok(self, event_set, next_event):
         for possible in event_set:
             if possible.matches(next_event):
                 event_set.remove(possible)
                 return True
         return False
+
+    def run_scripts(self, *scripts):
+        self.controller.run(*scripts)
+
+    def press(self, button, target, duration_ms=100):
+        self.controller.press(button, target, duration_ms)

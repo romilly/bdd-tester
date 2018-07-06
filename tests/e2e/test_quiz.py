@@ -2,11 +2,10 @@ import sys
 
 from hamcrest import contains_string, all_of
 from time import sleep
-
 from controller_test import AbstractControllerTest
 from helpers import see
 from mpbdd.helpers import Target
-from mpbdd.microbitcontroller import MicrobitController, BUTTON_A, BUTTON_B
+from mpbdd.microbitcontroller import BUTTON_A, BUTTON_B
 
 QUIZ_RUNNER = 'QuizRunner'
 TEAM1 = 'Team 1'
@@ -19,7 +18,10 @@ BUTTON_D = 16
 sys.path += '/home/romilly/git/active/bdd-tester/src'
 
 
-class QuizTest(AbstractControllerTest):
+class QuizRunner(AbstractControllerTest):
+    def setUp(self):
+        AbstractControllerTest.setUp(self)
+
     def test_button_and_display(self):
         self.controller.run(Target(QUIZ_RUNNER, 'tests/e2e/quizmaster.py'),
                             Target(TEAM1, 'tests/e2e/quizmaster.py'),
@@ -93,5 +95,7 @@ class QuizTest(AbstractControllerTest):
                                     contains_string('2:1'))))
         sleep(1.0) # wait for cool-down
 
+    def tearDown(self):
+        AbstractControllerTest.tearDown(self)
 
 

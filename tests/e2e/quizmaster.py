@@ -90,7 +90,6 @@ def run_a_round():
     while radio.receive():
         pass
     # get rid of late buzzes
-
     wait_for_buttons_to_clear()
     say('round %d' % round)
     radio.send('round %d' % round)

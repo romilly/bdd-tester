@@ -57,34 +57,50 @@ def check_answer(message):
         while True:
             if button_a.is_pressed():
                 scores[int(number)] += 1
-                return DONE
+                return True
             if button_b.is_pressed():
-                return
+                return False
 
 
 def wait_for_end():
     while True:
-        quit_if_game_over()
-        # end round
+        if button_d.read_digital():
+            return True
         if button_c.read_digital():
-            return DONE
+            return False
         message = radio.receive()
         if message is None:
             continue
-        response = check_answer(message)
-        if response == DONE:
-            return DONE
+        if check_answer(message):
+            return False
 
 
-# TODO: replace global scores with local parameter
+# TODO: replace global scores
+
+def wait_for_buttons_to_clear():
+    if (button_a.is_pressed() or
+        button_b.is_pressed() or
+        button_c.read_digital() or
+        button_d.read_digital()):
+        sleep(100)
+    sleep(200)
+
+
 def run_a_round():
-    # get rid of late buzzes
     while radio.receive():
         pass
+    # get rid of late buzzes
+
+    wait_for_buttons_to_clear()
     say('round %d' % round)
-    radio.send('round')
-    wait_for_end()
-    end_round()
+    radio.send('round %d' % round)
+    game_is_over =  wait_for_end()
+    if game_is_over:
+        say('game over')
+        return True
+    else:
+        end_round()
+        return False
 
 
 def end_round():
@@ -94,17 +110,11 @@ def end_round():
     say(ROUND_OVER)
 
 
-def quit_if_game_over():
-    if pin16.read_digital():
-        goodbye()
-
-
 def run_the_quiz():
     say('Play time!')
     while True:
-        quit_if_game_over()
-        run_a_round()
-
+        if run_a_round():
+            return
 
 def check_in():
     say(CHECKING_IN)
@@ -133,6 +143,7 @@ def play_a_round(team):
             say('team %d buzzing' % team)
             break
     while not round_is_over():
+        # skip around waiting for round to end
         pass
 
 
@@ -172,6 +183,7 @@ def goodbye():
     for team in scores.keys():
         message += ' %d:%d' % (team, scores[team])
     radio.send(message)
+    say(message)
     reset() # quit this run and start again
 
 
@@ -180,9 +192,9 @@ def run():
     role = wait_for_role()
     if role == RUNNER:
         do_runner_things()
+        show_results()
     if role == TEAM:
         do_team_player_things()
-    show_results()
 
 
 def wait_for_start():
@@ -197,7 +209,6 @@ def wait_for_start():
 def do_team_player_things():
     my_team = check_in()
     wait_for_start()
-    # say('team %d' % my_team)
     play_the_quiz(my_team)
 
 

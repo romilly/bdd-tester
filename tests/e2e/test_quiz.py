@@ -1,5 +1,6 @@
 import sys
 
+from hamcrest import contains_string, all_of
 from time import sleep
 
 from controller_test import AbstractControllerTest
@@ -80,5 +81,17 @@ class QuizTest(AbstractControllerTest):
             see(TEAM1, 'round over'),
             see(TEAM2, 'round over'))
         sleep(1.0) # allow radio stuff  to clear
+        self.expect(
+            see(QUIZ_RUNNER, 'round 3'),
+            see(TEAM1, 'round 3'),
+            see(TEAM2, 'round 3'))
+        self.controller.press_extra(QUIZ_RUNNER, BUTTON_D)
+        self.expect(
+            see(QUIZ_RUNNER, 'game over'),
+            see(QUIZ_RUNNER, all_of(contains_string("that's all"),
+                                    contains_string('1:0'),
+                                    contains_string('2:1'))))
+        sleep(1.0) # wait for cool-down
+
 
 

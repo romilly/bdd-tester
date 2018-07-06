@@ -52,7 +52,7 @@ class Harness():
 
     def read_digital_event(self, event):
         pin = self.callback(event.e_type)
-        pin._state = event.message
+        pin._state = int(event.message)
 
     def callback(self, key):
         return self._callbacks[key]

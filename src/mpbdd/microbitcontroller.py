@@ -4,7 +4,7 @@ import threading
 
 from time import sleep
 
-from mpbdd.helpers import event_message, DEFAULT_NAME, describe_command
+from mpbdd.helpers import event_message
 from mpbdd.microbit_port import MicrobitPort, ControllerRadioPort
 from mpbdd.monitors import LoggingMonitor
 

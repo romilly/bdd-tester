@@ -1,5 +1,4 @@
 import time
-from abc import ABCMeta
 from unittest import TestCase
 
 from mpbdd.microbitcontroller import MicrobitController
@@ -37,3 +36,6 @@ class AbstractControllerTest(TestCase):
 
     def press(self, button, target, duration_ms=100):
         self.controller.press(button, target, duration_ms)
+
+    def press_extra(self, target, pin_number, duration_ms=100):
+        self.controller.press_extra(target, pin_number, duration_ms)

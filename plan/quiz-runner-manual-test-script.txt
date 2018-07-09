@@ -1,0 +1,50 @@
+Press button_a on QuizRunner
+Expect 'runner' displayed on 'QuizRunner'
+Expect 'checking in' displayed on 'Team 1'
+Expect 'checking in' displayed on 'Team 2'
+Press button_b on Team 1
+Expect 'check' displayed on 'Team 1'
+Expect 'team 1 checked in' displayed on 'QuizRunner'
+Expect 'team: 1' displayed on 'Team 1'
+Press button_b on Team 2
+Expect 'check' displayed on 'Team 2'
+Expect 'team 2 checked in' displayed on 'QuizRunner'
+Press button_b on QuizRunner
+Expect 'team: 2' displayed on 'Team 2'
+Expect 'all checked in' displayed on 'QuizRunner'
+Expect 'Play time!' displayed on 'QuizRunner'
+Expect 'round 1' displayed on 'QuizRunner'
+Expect 'round 1' displayed on 'Team 1'
+Expect 'round 1' displayed on 'Team 2'
+Press button_a on Team 1
+Expect 'team 1 buzzing' displayed on 'QuizRunner'
+Expect 'team 1 buzzing' displayed on 'Team 1'
+Press button_b on QuizRunner
+Press button_a on Team 2
+Expect 'team 2 buzzing' displayed on 'QuizRunner'
+Expect 'team 2 buzzing' displayed on 'Team 2'
+Press button_a on QuizRunner
+Expect 'round over' displayed on 'QuizRunner'
+Expect 'round over' displayed on 'Team 1'
+Expect 'round over' displayed on 'Team 2'
+Expect 'round 2' displayed on 'QuizRunner'
+Expect 'round 2' displayed on 'Team 1'
+Expect 'round 2' displayed on 'Team 2'
+Press button_a on Team 2
+Expect 'team 2 buzzing' displayed on 'QuizRunner'
+Expect 'team 2 buzzing' displayed on 'Team 2'
+Press button_b on QuizRunner
+Press button_a on Team 1
+Expect 'team 1 buzzing' displayed on 'QuizRunner'
+Expect 'team 1 buzzing' displayed on 'Team 1'
+Press button_b on QuizRunner
+Press 8 on QuizRunner
+Expect 'round over' displayed on 'QuizRunner'
+Expect 'round over' displayed on 'Team 1'
+Expect 'round over' displayed on 'Team 2'
+Expect 'round 3' displayed on 'QuizRunner'
+Expect 'round 3' displayed on 'Team 1'
+Expect 'round 3' displayed on 'Team 2'
+Press 16 on QuizRunner
+Expect 'game over' displayed on 'QuizRunner'
+Expect (a string containing "that's all" and a string containing '1:0' and a string containing '2:1') displayed on 'QuizRunner'

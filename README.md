@@ -84,9 +84,9 @@ Run the test in the usual way.
 The test simulates two micro:bits, both running the same script.
 
 The test will simulate the pressing of button A on the first micro:bit,
-which then will then send a radio message.
+which then will then display 'ouch!' and send a radio message.
 
-When the second micro:bit receives rthe radi message, it displays 
+When the second micro:bit receives the radio message, it displays the message 'signal received!'
 
 
 

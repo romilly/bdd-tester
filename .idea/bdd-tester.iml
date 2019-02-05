@@ -7,7 +7,7 @@
       <sourceFolder url="file://$MODULE_DIR$/tests" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/plan/resources" />
     </content>
-    <orderEntry type="jdk" jdkName="Python 3.5" jdkType="Python SDK" />
+    <orderEntry type="jdk" jdkName="Python 3.7 (bdd-tester)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="bbc-microbit-nsp" />
   </component>

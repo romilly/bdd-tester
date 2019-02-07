@@ -24,9 +24,9 @@ class QuizRunner(AbstractControllerTest):
         AbstractControllerTest.setUp(self)
 
     def test_button_and_display(self):
-        self.run_scripts(Target(QUIZ_RUNNER, 'tests/e2e/quizmaster.py'),
-                            Target(TEAM1, 'tests/e2e/quizmaster.py'),
-                            Target(TEAM2, 'tests/e2e/quizmaster.py'))
+        self.run_scripts(Target(QUIZ_RUNNER, 'tests/e2e/quizrunner.py'),
+                            Target(TEAM1, 'tests/e2e/quizrunner.py'),
+                            Target(TEAM2, 'tests/e2e/quizrunner.py'))
         self.press(QUIZ_RUNNER, BUTTON_A)
         self.expect(see(QUIZ_RUNNER, 'runner'))
         self.expect(see(TEAM1, 'checking in'),

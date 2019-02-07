@@ -1,11 +1,9 @@
 import sys
 
-from hamcrest import contains_string, all_of
-from time import sleep
 from controller_test import AbstractControllerTest
 from helpers import see
 from mpbdd.helpers import Target
-from mpbdd.microbitcontroller import BUTTON_A, BUTTON_B, MicrobitController
+from mpbdd.microbitcontroller import BUTTON_A
 
 MB1 = 'Microbit 1'
 MB2 = 'Microbit 2'

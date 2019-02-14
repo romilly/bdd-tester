@@ -37,11 +37,12 @@ class QuizRunner(AbstractControllerTest):
             see(QUIZ_RUNNER, 'team 2 buzzing'),
             see(TEAM2, 'team 2 buzzing'))
         self.press_extra(QUIZ_RUNNER, BUTTON_D)
+        sleep(0.2)
         self.expect(
             see(QUIZ_RUNNER, 'game over'),
             see(QUIZ_RUNNER, all_of(contains_string("that's all"),
                                     contains_string('1:0'),
-                                    contains_string('2:0'))))
+                                    contains_string('2:0'))), timeout_ms=1000)
         sleep(1.0)  # wait for cool-down
 
     def start_quiz(self):

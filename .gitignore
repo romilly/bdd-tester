@@ -139,4 +139,5 @@ plan/resources/
 /.idea/sonarlint/
 /logs/
 !/logs/
-/logs/*.log
+/logs/*.log*
+
